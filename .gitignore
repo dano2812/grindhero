@@ -1,0 +1,43 @@
+# Unity generated directories (project is nested under game).
+/game/[Ll]ibrary/
+/game/[Tt]emp/
+/game/[Oo]bj/
+/game/[Ll]ogs/
+/game/[Uu]ser[Ss]ettings/
+/game/[Mm]emoryCaptures/
+/game/[Rr]ecordings/
+/game/[Bb]uild/
+/game/[Bb]uilds/
+/game/.vs/
+/game/.idea/
+/game/*.csproj
+/game/*.sln
+/game/*.slnx
+/game/*.user
+/game/*.pidb
+/game/*.booproj
+
+# Local output and tooling.
+/.artifacts/
+/.vs/
+/.idea/
+**/__pycache__/
+.DS_Store
+Thumbs.db
+
+# Signing material, store credentials, and local environment configuration.
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.mobileprovision
+*.cer
+*.key
+*.pem
+*.ulf
+*.apk
+*.aab
+*.ipa

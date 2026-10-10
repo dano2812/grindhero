@@ -1,0 +1,16 @@
+instructions: |
+  Read README.md, CONTRIBUTING.md, docs/architecture.md, and docs/roadmap.md.
+  This is a Unity/C# mobile game foundation; game/ is not yet a Unity project.
+  Follow assembly boundaries and keep gameplay rules independent of UnityEngine.
+  Preserve Unity .meta GUIDs; create scenes, prefabs, and project settings in the editor.
+  Use data-driven content IDs, versioned saves, and explicit error handling.
+  Never put secrets, signing material, or authoritative purchase logic in the client.
+  Do not add ECS, a DI framework, a backend, analytics, or IAP without an approved need.
+  Update relevant documentation and tests; report unavailable Unity/device checks honestly.
+scripts:
+  - name: Check repository foundation
+    command: powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-Repository.ps1
+  - name: Test foundation checker
+    command: powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-Repository.Tests.ps1
+  - name: Test Unity readiness and reports
+    command: powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-UnityChecks.Tests.ps1

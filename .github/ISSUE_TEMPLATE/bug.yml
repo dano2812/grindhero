@@ -1,0 +1,29 @@
+name: Bug report
+description: Reproducible gameplay or tooling defect (not private security reports)
+title: "[Bug] "
+body:
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: App/build version, device, OS, and relevant editor version.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Include sanitized save/replay details when useful; never include credentials.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence and impact
+      description: Sanitized logs/screenshots, frequency, and player impact.

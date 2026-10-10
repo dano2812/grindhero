@@ -1,0 +1,77 @@
+name: Unity tests (manual until M1)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: unity-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  readiness:
+    name: Verify Unity bootstrap
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Verify project readiness
+        shell: pwsh
+        run: ./scripts/Test-UnityProjectReady.ps1
+
+  tests:
+    name: Unity ${{ matrix.mode }}
+    needs: readiness
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: unity-ci
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [editmode, playmode]
+    steps:
+      - name: Checkout approved revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Verify licensing configuration
+        shell: pwsh
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        run: |
+          foreach ($name in @('UNITY_LICENSE', 'UNITY_EMAIL', 'UNITY_PASSWORD')) {
+            if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($name))) {
+              throw "Configure $name in the protected unity-ci environment before running engine tests."
+            }
+          }
+      - name: Run Unity tests
+        uses: game-ci/unity-test-runner@32e57712352b500e17974b245a6dce9e11a73213 # v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          cliVersion: v0.1.72
+          projectPath: game
+          testMode: ${{ matrix.mode }}
+          coverageEnabled: false
+          githubToken: ''
+          artifactsPath: .artifacts/unity-${{ matrix.mode }}
+      - name: Require executed tests
+        shell: pwsh
+        run: ./scripts/Assert-UnityTestResults.ps1 -ResultsPath ".artifacts/unity-${{ matrix.mode }}"
+      - name: Preserve reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: unity-${{ matrix.mode }}-${{ github.run_id }}
+          path: .artifacts/unity-${{ matrix.mode }}
+          if-no-files-found: warn
+          retention-days: 14
