@@ -1,0 +1,24 @@
+{
+  "name": "GrindHero.Persistence.Tests",
+  "rootNamespace": "GrindHero.Tests.Persistence",
+  "references": [
+    "GrindHero.Application",
+    "GrindHero.Infrastructure"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "noEngineReferences": false
+}

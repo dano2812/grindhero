@@ -1,0 +1,21 @@
+{
+  "name": "GrindHero.Domain.Tests",
+  "rootNamespace": "GrindHero.Tests.Domain",
+  "references": [
+    "GrindHero.Domain"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "noEngineReferences": true
+}

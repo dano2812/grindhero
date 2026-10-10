@@ -1,0 +1,22 @@
+{
+  "name": "GrindHero.PlayMode.Tests",
+  "rootNamespace": "GrindHero.Tests.PlayMode",
+  "references": [
+    "GrindHero.Bootstrap",
+    "GrindHero.Presentation"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "noEngineReferences": false
+}
