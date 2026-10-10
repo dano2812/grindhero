@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8640b03a12f9f647a64940e94717b85, type: 3}
+  m_Name: Boss
+  m_EditorClassIdentifier: GrindHero.Presentation::GrindHero.Presentation.Definitions.EnemyDefinition
+  stableId: enemy.boss.first-section
+  displayName: Section Boss
+  archetype: 3
+  attackDamageType: 0
+  maximumHealth: 450
+  attackDamage: 22
+  attackCycleSeconds: 1
+  windupSeconds: 0.6
+  attackRange: 2.5
+  aggroRange: 12
+  movementSpeed: 3.6
+  chaseTimeoutSeconds: 5
+  returnHealFractionPerSecond: 0.1
+  returnAndHeal: 0
+  canRespawn: 0
+  respawnCooldownSeconds: 0
+  maximumRespawnsPerDay: 0
+  rewardStat: 0
+  rewardPoints: 0
+  grayboxColor: {r: 0.68, g: 0.12, b: 0.18, a: 1}

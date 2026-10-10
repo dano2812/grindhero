@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e8490e48058c314585c35d9674d06fb, type: 3}
+  m_Name: FirstSliceTuning
+  m_EditorClassIdentifier: GrindHero.Presentation::GrindHero.Presentation.Definitions.FirstSliceTuning
+  startingMaximumHealth: 100
+  healthPerPoint: 5
+  baseAxeDamage: 15
+  axeDamagePerPoint: 1
+  movementSpeed: 4.5
+  startingDodgeChance: 0
+  startingBlockChance: 0
+  blockDamageMultiplier: 0.8
+  respawnHealthFraction: 0.5
+  startingWeapon: {fileID: 11400000, guid: a21ea24dec9d64841b3bca94659b65a4, type: 2}
+  headArmor: {fileID: 11400000, guid: 356677b37fadf1641859adbc1fffd808, type: 2}
+  torsoArmor: {fileID: 11400000, guid: 385790b762b5f0d47b3fc5cb02d67636, type: 2}
+  maximumMobRespawnsPerDay: 3
+  saveIntervalSeconds: 5

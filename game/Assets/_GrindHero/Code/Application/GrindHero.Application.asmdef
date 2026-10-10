@@ -1,0 +1,16 @@
+{
+  "name": "GrindHero.Application",
+  "rootNamespace": "GrindHero.Application",
+  "references": [
+    "GrindHero.Domain"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": true
+}

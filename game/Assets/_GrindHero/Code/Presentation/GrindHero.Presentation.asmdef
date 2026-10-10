@@ -1,0 +1,19 @@
+{
+  "name": "GrindHero.Presentation",
+  "rootNamespace": "GrindHero.Presentation",
+  "references": [
+    "GrindHero.Application",
+    "GrindHero.Domain",
+    "Unity.InputSystem",
+    "UnityEngine.UI"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

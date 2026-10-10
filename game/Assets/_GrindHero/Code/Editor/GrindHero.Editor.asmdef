@@ -1,0 +1,20 @@
+{
+  "name": "GrindHero.Editor",
+  "rootNamespace": "GrindHero.EditorTools",
+  "references": [
+    "GrindHero.Bootstrap",
+    "GrindHero.Domain",
+    "GrindHero.Presentation"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

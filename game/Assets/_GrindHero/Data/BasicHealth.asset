@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8640b03a12f9f647a64940e94717b85, type: 3}
+  m_Name: BasicHealth
+  m_EditorClassIdentifier: GrindHero.Presentation::GrindHero.Presentation.Definitions.EnemyDefinition
+  stableId: enemy.basic.health
+  displayName: "Basic \u2014 HP"
+  archetype: 0
+  attackDamageType: 0
+  maximumHealth: 80
+  attackDamage: 11
+  attackCycleSeconds: 1
+  windupSeconds: 0.5
+  attackRange: 2.1
+  aggroRange: 8
+  movementSpeed: 3.2
+  chaseTimeoutSeconds: 5
+  returnHealFractionPerSecond: 0.1
+  returnAndHeal: 1
+  canRespawn: 1
+  respawnCooldownSeconds: 120
+  maximumRespawnsPerDay: 3
+  rewardStat: 1
+  rewardPoints: 1
+  grayboxColor: {r: 0.72, g: 0.24, b: 0.19, a: 1}

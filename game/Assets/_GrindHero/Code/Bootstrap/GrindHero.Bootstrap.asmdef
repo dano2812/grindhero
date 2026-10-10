@@ -1,0 +1,19 @@
+{
+  "name": "GrindHero.Bootstrap",
+  "rootNamespace": "GrindHero",
+  "references": [
+    "GrindHero.Application",
+    "GrindHero.Domain",
+    "GrindHero.Infrastructure",
+    "GrindHero.Presentation"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
