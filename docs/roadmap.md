@@ -1,7 +1,7 @@
 # Roadmap and task structure
 
-M0 is delivered. The project now also has an Editor-validated first-slice
-graybox and local rule/persistence/scene tests. M1 is **not complete** until
+M0 is delivered. The project now also has the Editor-validated Mosswatch Hollow
+section with original art and local rule/persistence/scene tests. M1 is **not complete** until
 licensed platform builds and physical-device verification pass. The entries
 below are a local planning backlog, not already-created GitHub issues or
 delivery-date promises.
@@ -37,41 +37,47 @@ associated repository work can still be done here.
 3. **I can — Bootstrap the Universal 3D project at `game` (completed).** The
    project uses Editor `6000.6.5f1`, URP `17.6.0`, and a resolved package lock.
    The original foundation baseline passed 9 EditMode tests and 1 PlayMode
-   smoke test. The current slice passes 9 EditMode and 8 PlayMode tests,
-   including recovery and HUD regressions. **You must:** accept applicable
+   smoke test. The current section passes 12 EditMode and 11 PlayMode tests,
+   including recovery, HUD, migration, and story/treasure/reload regressions. **You must:** accept applicable
    Unity terms and verify platform builds on physical devices.
 4. **Together — Review the first-slice interaction choices.** Landscape,
    one-finger virtual-joystick movement, a following fixed-angle camera, and
-   automatic nearby targeting are in the graybox. **I can:** refine the
+   automatic nearby targeting are in the first section. **I can:** refine the
    prototype and tests. **You must:** choose the feel after trying it on actual
    screens.
 5. **I can — Implement M1's reusable foundation and first slice (initial implementation complete).**
-   The graybox includes hero movement, axe auto-attacks, head/torso armor,
+   The first section includes hero movement, axe auto-attacks, head/torso armor,
    Basic HP/Attack rewards, an Advanced enemy, a boss-gated exit, pause/resume,
-   versioned local saves, and a test-only scene. Damage/respawn/boss values are
+   versioned local saves, and a test-only scene. Mosswatch now adds original
+   low-poly art/animation, continuous hero healing, the Warden main quest,
+   permanent-stat grove treasure, and persisted section completion.
+   Damage/respawn/boss/reward values are
    tunable prototype assumptions, not final decisions. **You must:** review
    these assumptions and report desired changes.
 6. **Together — Play and tune the first playable section.** **I can:** adjust
    content values, behaviors, feedback, and automated coverage. **You must:**
-   run the graybox on iOS and Android devices and report where controls,
+   run Mosswatch on iOS and Android devices and report where controls,
    difficulty, camera, or feedback do not feel right; approve final design and
-   commissioned/licensed art.
+   the original first-section art.
 7. **You — Enable licensed CI and device build access when ready.** Configure a
    protected `unity-ci` environment and licensing secrets without sharing them
    in chat or committing them. Arrange an iOS/macOS build host and target-device
    smoke tests. **I can:** maintain workflows, add build/test validation, and
    debug sanitized logs. **You must:** provide licenses, account access,
    environment approvals, and real-device verification.
-8. **Together — Expand only after the vertical slice passes review.** Approve
-   stats, equipment/loot, quests, secrets, story, and a second section in the
-   worksheet; then we can implement them in small tasks. **I can:** build
+8. **Together — Review Mosswatch before expanding beyond it.** The owner
+   explicitly authorized completing this section and its graphics while device
+   gates remain open (DEC-013). A second section and broader equipment/loot
+   systems are still later scope. **I can:** build
    data-driven systems/content validators and tests. **You must:** approve
    creative direction, provide/commission licensed assets, and accept the MVP
    scope.
 9. **You — Make release and monetization decisions later.** Before beta,
    arrange developer accounts, privacy/store disclosures, signing, support
-   contact, and release permissions. Purchases are a separate optional
-   milestone after product, privacy, and server-authority decisions. **I can:**
+   contact, and release permissions. Purchases remain a separate future
+   milestone after product, privacy, and server-authority decisions. Full
+   free-to-play completion is required; any purchases only accelerate progress.
+   Specific products/pricing remain open. **I can:**
    prepare/review code and secure workflows. **You must:** hold the accounts,
    credentials, legal approvals, and final publication authority.
 
@@ -80,9 +86,46 @@ ARM64 device and exercise the checklist in
 [getting started](getting-started.md#local-android-smoke-apk). On 2026-11-19 the
 owner accepted the current verification/playtest state "for now" and asked to
 continue. That is provisional acceptance, not physical-device evidence.
-Always-active hero healing and an ordinary-mob-style boss with higher HP/damage
-are recorded; hero healing is not yet implemented. Numeric tuning, unspecified
-stat sources, and unresolved worksheet details remain provisional.
+Always-active hero healing is implemented at a provisional 2 HP/second, and the
+boss uses ordinary mob behavior with higher HP/damage. Mosswatch's complete
+first-section realization is implemented; numeric tuning, unspecified stat
+sources, and unresolved worksheet details remain provisional.
+
+**Approved longer-term world direction (2026-11-19):** The owner approved
+20 distinct themed locations in one connected map. Each boss permanently
+unlocks the next, harder location; players can freely revisit unlocked
+locations. The ordered names/themes are maintained in the
+[gameplay specification](gameplay-specification.md#approved-world-progression-and-location-themes).
+Only Mosswatch is implemented. This approval records content direction, not
+authorization to implement all remaining locations now or a change to the
+proposed MVP scope and validation gates.
+
+**Recorded future encounter requirement (2026-11-19):** A quest giver in each
+location summons a sequential series of unique, weakness-driven quest mobs,
+with greater rewards for each defeat. Location N has N encounters, ending with
+20 at The Eclipse Throne. Each summon requires visiting the NPC and confirming;
+a quest mob disappears after killing the hero and must be manually re-summoned
+for another attempt. The scope was clarified from maps to locations.
+Detailed design remains open. See the
+[gameplay specification](gameplay-specification.md#location-quest-giver-and-summoned-quest-mobs).
+This is documentation-only scope for later specification, not an implemented
+feature or an instruction to expand the current slice now.
+
+**Required development tooling (2026-11-19):** Build a per-location difficulty
+and progression-pacing calculator/test tool. The owner's examples are about
+1 hour of early-location farming and 1-3 months at the final location; these
+are illustrative targets pending explicit active-play/calendar and session
+assumptions, not verified current balance. The tool must be part of development
+and location balancing. See the
+[gameplay specification](gameplay-specification.md#required-difficulty-and-progression-pacing-tool)
+and [testing strategy](testing.md#required-difficulty-and-progression-pacing-tool).
+Documentation only so far; implementation is backlog task S-06.
+
+**Confirmed free-to-play requirement (2026-11-19):** The whole game must be
+completable without spending money. Future purchases only speed up progression;
+they cannot be required for quests, bosses, or location/map unlocks. S-06 must
+use a no-purchase baseline for pacing. Product design and implementation remain
+future work; see [business decisions](gameplay-specification.md#10-future-business-decisions-can-wait-until-after-the-mvp).
 
 ## Milestones and exit gates
 
@@ -90,7 +133,7 @@ stat sources, and unresolved worksheet details remain provisional.
 | --- | --- | --- |
 | M0 Foundation | None | Documented structure/rules/decisions, templates, working foundation CI |
 | M1 Bootstrap and mobile proof | M0 | Pinned Unity `6000.6.5f1` Update/URP project with clean import/compile, useful assemblies/tests, both physical-device builds, licensed CI |
-| M2 Vertical slice | M1 | Fun one-section combat/boss/unlock loop, restart persistence, measured device budgets |
+| M2 Vertical slice | M1 | Fun one-section combat/boss/unlock loop, restart persistence, repeatable progression-pacing tool/report, measured device budgets |
 | M3 Systems | M2 | Data-driven loot/equipment/stats, versioned recoverable saves, repeatable balance tests |
 | M4 Content pipeline and MVP | M3 | Second section added without section-specific code; quest/story/secret/skin authored and validated |
 | M5 Hardening and beta | M4 | Device/support matrix, accessibility/privacy/store readiness, signed beta distribution |
@@ -99,14 +142,19 @@ stat sources, and unresolved worksheet details remain provisional.
 Do not implement future milestones merely to fill folders. No multiplayer or live
 operations milestone is implied.
 
-**Current evidence (2026-11-19):** Repository/readiness checks, all 9 EditMode
-tests, and all 8 PlayMode tests pass. A local IL2CPP/ARM64 Android development
-APK built with zero reported build warnings, and its manifest/native libraries
+**Current evidence (2026-11-19):** Repository/readiness checks, all 12 EditMode
+tests, and all 11 PlayMode tests pass. Original-art opening/story/grove/guardian
+Editor previews were rendered and inspected. An updated IL2CPP/ARM64 Android development
+APK built successfully, and its manifest/native libraries
 and signature were verified. The initial license failure was resolved by the
 owner; the non-ASCII Windows path required ASCII project and Gradle-cache paths.
 No Android device was connected. Physical installation, touch/graphics,
 suspend/resume, performance soak, iOS player build, and licensed CI remain open.
 M1 is not complete. The readiness precheck itself does not compile or run Unity.
+M2's one-section implementation now exists, but its fun/performance acceptance
+gate is not complete. First-section quest/treasure/save work partially realizes
+later backlog concerns; this does not claim a generalized inventory, quest graph,
+or second-section content pipeline.
 
 ## Dependency-ready task backlog
 
@@ -122,7 +170,8 @@ M1 is not complete. The readiness precheck itself does not compile or run Unity.
 | S-02 | Combat rules and enemy lifecycle | B-02, S-01 | Health/damage/death, 3-second hero respawn, lethal-attacker retreat/attack lock, 1-second enemy attack cycles, all enemy types including the boss chase for 5 seconds then return with 10%-of-max-HP-per-second healing until full (at spawn if necessary) and player-hit interruption/reset, projected hero/mob HP banners, Basic HP/Attack variants, Advanced enemy, deterministic rewards, spawn-point respawn markers with cooldown and remaining-count visuals, respawn and pause tests |
 | S-03 | Boss progression and locked exit | S-02 | Boss completion unlocks exactly once; interrupted/replayed completion tested |
 | S-04 | Minimal save snapshot and recovery | S-03 | Restart retains unlock; corrupt/interrupted writes recover explicitly |
-| S-05 | Slice performance/fun review | S-04 | 15-minute device soak; approved numeric budgets and combat direction |
+| S-06 | Difficulty and progression pacing tool | S-02, S-03, S-04 | Repeatable per-location farming/time-to-boss reports using authored rules/data; explicit entry-state, skill/session, active/calendar-time assumptions; cooldown/daily-limit and unreachable-progression checks; reference-scenario validation |
+| S-05 | Slice performance/fun review | S-04, S-06 | Pacing-tool report compared with playtesting; 15-minute device soak; approved numeric budgets and combat direction |
 | Y-01 | Item definitions, stats, equipment | S-05 | Stable IDs, slot rules, stat examples/tests, first visual equipment |
 | Y-02 | Loot and inventory | Y-01 | Seeded rolls, full-inventory behavior, valid tables, no duplicate rewards |
 | Y-03 | Save schema and migration fixtures | Y-02, S-04 | Old slice saves migrate; inventory/quest extension documented; recovery tests |
@@ -132,7 +181,7 @@ M1 is not complete. The readiness precheck itself does not compile or run Unity.
 | H-01 | Device/accessibility/quality pass | C-02, C-03 | Supported matrix/budgets met; critical regressions pass |
 | H-02 | Privacy, identifiers, signing, beta CI | B-04, B-05 | Store/legal/contact decisions; protected secrets; build-number allocation implemented |
 | H-03 | Internal beta and recovery rehearsal | H-01, H-02 | Signed installs, prior-save migration, forward-fix plan demonstrated |
-| P-01 | Monetization and backend ADR | H-03 | Product catalog/account/offline policy and authority reviewed |
+| P-01 | Monetization and backend ADR | H-03 | Full F2P completion preserved; optional progression accelerators specified; product catalog/account/offline policy and authority reviewed |
 | P-02 | Server verification/entitlement ledger | P-01 | Unique transactions, atomic grants, auth, audit, refunds/reconciliation tests |
 | P-03 | Client IAP adapter and sandbox flows | P-02 | Pending/retry/restore/revoke/account-mismatch tests on both stores |
 | P-04 | Purchase readiness review | P-03 | Security/privacy/store lifecycle gates pass before enabling paid products |

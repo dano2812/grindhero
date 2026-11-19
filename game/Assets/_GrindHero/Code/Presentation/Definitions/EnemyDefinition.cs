@@ -7,6 +7,7 @@ namespace GrindHero.Presentation.Definitions
     public sealed class EnemyDefinition : ScriptableObject
     {
         private const float FocusRangeMultiplier = 2f;
+        public GameObject visualPrefab;
 
         public string stableId;
         public string displayName;

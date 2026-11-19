@@ -1,6 +1,7 @@
 using GrindHero.Application.Combat;
 using GrindHero.Presentation.UI;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace GrindHero.Presentation.World
 {
@@ -13,6 +14,7 @@ namespace GrindHero.Presentation.World
         private HUDPresenter _hud;
         private Transform _panel;
         private BoxCollider _panelCollider;
+        private readonly List<Material> _ownedMaterials = new List<Material>();
         private Color _closedColor = new Color(0.72f, 0.18f, 0.12f);
         private Color _openColor = new Color(0.2f, 0.72f, 0.4f);
 
@@ -67,8 +69,8 @@ namespace GrindHero.Presentation.World
 
             _hud.ShowMessage(
                 IsUnlocked
-                    ? "The next section is unlocked. It is outside this prototype."
-                    : "Defeat the boss to unlock the exit.",
+                    ? "The eastern road is open. Mosswatch is yours to explore."
+                    : "The Hollow Guardian holds this gate. Defeat it to open the eastern road.",
                 IsUnlocked ? _openColor : _closedColor);
         }
 
@@ -101,17 +103,35 @@ namespace GrindHero.Presentation.World
 
         private Transform CreateBlocker()
         {
-            var blocker = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            blocker.name = "Gate panel";
+            var blocker = new GameObject("Gate panel", typeof(BoxCollider));
             blocker.transform.SetParent(transform, false);
             blocker.transform.localPosition = new Vector3(0f, ClosedPanelHeight, 0f);
-            blocker.transform.localScale = new Vector3(3.1f, 2.6f, 0.28f);
             _panelCollider = blocker.GetComponent<BoxCollider>();
-            ApplyMaterial(blocker.GetComponent<Renderer>(), _closedColor);
+            _panelCollider.size = new Vector3(3.1f, 2.6f, 0.28f);
+            for (var i = 0; i < 7; i++)
+            {
+                var bar = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                bar.name = "Forged gate bar";
+                bar.transform.SetParent(blocker.transform, false);
+                bar.transform.localPosition = new Vector3(-1.35f + i * 0.45f, 0f, 0f);
+                bar.transform.localScale = new Vector3(0.13f, 2.6f, 0.16f);
+                Destroy(bar.GetComponent<Collider>());
+                ApplyMaterial(bar.GetComponent<Renderer>(), new Color(0.25f, 0.32f, 0.31f));
+            }
+            for (var i = 0; i < 2; i++)
+            {
+                var brace = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                brace.name = "Gate brace";
+                brace.transform.SetParent(blocker.transform, false);
+                brace.transform.localPosition = new Vector3(0f, i == 0 ? -0.7f : 0.7f, 0f);
+                brace.transform.localScale = new Vector3(3f, 0.16f, 0.22f);
+                Destroy(brace.GetComponent<Collider>());
+                ApplyMaterial(brace.GetComponent<Renderer>(), new Color(0.83f, 0.57f, 0.25f));
+            }
             return blocker.transform;
         }
 
-        private static void ApplyMaterial(Renderer renderer, Color color)
+        private void ApplyMaterial(Renderer renderer, Color color)
         {
             if (renderer == null)
             {
@@ -126,8 +146,15 @@ namespace GrindHero.Presentation.World
 
             if (shader != null)
             {
-                renderer.sharedMaterial = new Material(shader) { color = color };
+                var material = new Material(shader) { color = color };
+                renderer.sharedMaterial = material;
+                _ownedMaterials.Add(material);
             }
+        }
+
+        private void OnDestroy()
+        {
+            foreach (var material in _ownedMaterials) Destroy(material);
         }
     }
 }

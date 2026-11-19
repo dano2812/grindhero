@@ -48,6 +48,10 @@ namespace GrindHero.Presentation.Input
             {
                 _ringRect.gameObject.SetActive(false);
             }
+            if (_handleRect != null)
+            {
+                _handleRect.gameObject.SetActive(false);
+            }
         }
 
         private void Update()
@@ -168,6 +172,7 @@ namespace GrindHero.Presentation.Input
                 _ringRect.anchoredPosition = localPosition;
                 if (_handleRect != null)
                 {
+                    _handleRect.gameObject.SetActive(true);
                     _handleRect.anchoredPosition = localPosition;
                 }
             }
@@ -210,6 +215,10 @@ namespace GrindHero.Presentation.Input
             if (_ringRect != null)
             {
                 _ringRect.gameObject.SetActive(false);
+            }
+            if (_handleRect != null)
+            {
+                _handleRect.gameObject.SetActive(false);
             }
         }
     }

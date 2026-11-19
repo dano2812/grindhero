@@ -28,8 +28,64 @@ the shipped game includes or exposes an AI system or publishes AI-generated
 content. Review the intended product and distribution context separately
 before release; seek qualified legal advice where needed.
 
+## GrindHero compliance planning
+
+**Owner requirement, 2026-11-19:** Develop and release the game in alignment with
+applicable AI legislation. The notes below are preliminary development guidance
+based on the official sources reviewed on that date, not a legal opinion,
+completed applicability assessment, or certification.
+
+The current design uses AI-assisted development and authored game behavior,
+not an approved player-facing generative-AI feature. This distinction must be
+reviewed against the actual shipped build and distribution territories.
+Ordinary game logic is not automatically an AI system under the Act just
+because it is called enemy "AI". Nor does using a coding assistant by itself
+turn the shipped game into a high-risk AI system.
+
+Before release, and when adding an AI feature:
+
+- Maintain an inventory separating development tools, generated/static content,
+  internal balancing tools, and player-facing AI. Record intended use, supplier,
+  relevant version, human review, and data handling. Assess provider/deployer
+  roles separately; using an external model does not resolve every obligation
+  for the game publisher.
+- Support AI literacy for people using AI on the project's behalf: tool limits,
+  hallucinations, confidential data, output review, licensing, and escalation.
+  Article 4, as amended, requires measures supporting literacy development,
+  not a guaranteed specific literacy level or a universal training certificate.
+- Review Article 50 for any direct AI interaction, synthetic-content generation,
+  deepfake use, or public-interest publication. It applies from 2 August 2026.
+  Provider-side machine-readable marking and deployer-side disclosures are
+  distinct duties. Fictional game content is not automatically a deepfake;
+  artistic works are not a blanket exemption where disclosure duties apply.
+  A source-code header or repository notice is not sufficient compliance.
+- Keep provenance and commercial-use/licensing evidence for code and assets.
+  Human review and a vendor's AI label do not, on their own, establish copyright,
+  voice/likeness permissions, or permission to copy another game's content.
+  These are related IP issues, not all AI Act duties.
+- Do not use AI to manipulate purchases or exploit vulnerable players,
+  especially children. Article 5 prohibitions have specific legal thresholds,
+  including significant-harm conditions for the relevant manipulation and
+  vulnerability provisions; not every long grind or adaptive mechanic is
+  automatically prohibited. Consumer-protection rules apply independently.
+- Review GDPR, child protection, SDK/platform rules, and consumer obligations
+  separately if player data, profiling, chat, voice, or purchase systems are
+  introduced. Do not equate F2P completion with lawful monetization design.
+- Obtain a release-specific legal applicability review. Reassess after changes
+  to runtime AI, generated media, personalization, target audiences, suppliers,
+  or EU legislation/guidance. Do not advertise "AI Act compliant" on the basis
+  of these documents alone.
+
+The Commission describes many AI-enabled games as minimal/no-risk examples,
+but classification depends on actual functionality and intended use. The
+high-risk conformity/registration regime is not automatically required merely
+because AI assisted the game's development.
+
 ## Official references
 
+- [European Commission AI Act framework and current timeline](https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai)
+- [AI literacy: current Commission questions and answers](https://digital-strategy.ec.europa.eu/en/faqs/ai-literacy-questions-answers)
+- [EU AI Act, Article 5: prohibited practices](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-5)
 - [EU AI Act, Article 50](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50)
 - [European Commission guidelines on transparency obligations](https://digital-strategy.ec.europa.eu/en/policies/guidelines-ai-transparency-obligations)
 - [European Commission Code of Practice on transparency of AI-generated content](https://digital-strategy.ec.europa.eu/en/policies/code-practice-ai-generated-content)

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84b01ae800af8a340ae644f70874a1df, type: 3}
+  m_Name: Mosswatch
+  m_EditorClassIdentifier: GrindHero.Presentation::GrindHero.Presentation.Definitions.FirstSectionDefinition
+  sectionId: section.mosswatch
+  questId: quest.mosswatch.warden
+  treasureId: treasure.mosswatch.grove
+  displayName: MOSSWATCH HOLLOW
+  questTitle: The silent watch
+  introduction: 'Warden: The old guardian has turned against us. Follow the lanterns, grow stronger, and free the eastern gate.'
+  conclusion: 'Warden: You have restored the watch. Take this strength with you. The road beyond Mosswatch is yours.'
+  questHealthPoints: 2
+  questAttackPoints: 2
+  treasureHealthPoints: 3
+  interactionDistance: 2.4

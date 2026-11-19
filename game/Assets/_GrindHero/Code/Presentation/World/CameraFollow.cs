@@ -28,7 +28,10 @@ namespace GrindHero.Presentation.World
                 return;
             }
 
-            var desiredPosition = _target.position + followOffset;
+            var focus = _target.position;
+            focus.x = Mathf.Clamp(focus.x, -8f, 8f);
+            focus.z = Mathf.Clamp(focus.z, -3f, 3f);
+            var desiredPosition = focus + followOffset;
             var blend = 1f - Mathf.Exp(-followSharpness * Time.deltaTime);
             transform.position = Vector3.Lerp(transform.position, desiredPosition, blend);
         }

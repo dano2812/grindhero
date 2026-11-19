@@ -17,7 +17,7 @@ using UnityEngine;
 namespace GrindHero
 {
     [RequireComponent(typeof(CombatWorld))]
-    public sealed class GameBootstrapper : MonoBehaviour, ICombatSession
+    public sealed class GameBootstrapper : MonoBehaviour, ICombatSession, ISectionSession
     {
         [SerializeField] private FirstSliceTuning tuning;
         [SerializeField] private HeroActor hero;
@@ -27,6 +27,7 @@ namespace GrindHero
         [SerializeField] private HUDPresenter hud;
         [SerializeField] private ExitGate exitGate;
         [SerializeField] private EnemySpawnPoint[] enemySpawnPoints;
+        [SerializeField] private SectionAdventure sectionAdventure;
         [SerializeField, Tooltip("Optional relative directory under the temporary cache for isolated integration tests.")]
         private string saveDirectoryOverride;
 
@@ -178,6 +179,7 @@ namespace GrindHero
             ConfigureSpawnPoints();
             _isReady = true;
             InitializeSpawnPoints();
+            sectionAdventure.Initialize(this, this, hero, hud);
 
             if (progressData.currentHealth <= 0f)
             {
@@ -210,6 +212,11 @@ namespace GrindHero
                 {
                     CompleteHeroRespawn();
                 }
+            }
+            else if (!_isPaused)
+            {
+                _progression.Data.currentHealth = RecoveryRules.Heal(
+                    CurrentHealth, MaximumHealth, tuning.healingPerSecond, Time.deltaTime);
             }
 
             if (!_isPaused && Time.unscaledTime >= _nextSaveTime)
@@ -248,6 +255,10 @@ namespace GrindHero
             _progression.Data.currentHealth = Mathf.Max(
                 0f,
                 _progression.Data.currentHealth - (float)result.FinalDamage);
+            if (result.FinalDamage > 0d)
+            {
+                hero.ShowDamage((float)result.FinalDamage);
+            }
             if (_progression.Data.currentHealth <= 0f)
             {
                 BeginHeroRespawn();
@@ -267,6 +278,48 @@ namespace GrindHero
             _progression.Data.heroPositionX = x;
             _progression.Data.heroPositionY = y;
             _progression.Data.heroPositionZ = z;
+        }
+
+        public bool IsQuestAccepted(string id) => Array.IndexOf(_progression.Data.acceptedQuestIds, id) >= 0;
+        public bool IsQuestCompleted(string id) => Array.IndexOf(_progression.Data.completedQuestIds, id) >= 0;
+        public bool IsTreasureLooted(string id) => Array.IndexOf(_progression.Data.lootedTreasureIds, id) >= 0;
+        public bool IsSectionCompleted(string id) => Array.IndexOf(_progression.Data.completedSectionIds, id) >= 0;
+
+        public bool AcceptQuest(string id)
+        {
+            if (id != sectionAdventure.Definition.questId) throw new ArgumentException("Unknown section quest.", nameof(id));
+            if (!_progression.AcceptQuest(id)) return false;
+            SaveProgress();
+            return true;
+        }
+
+        public bool ClaimQuestReward(string id, int healthPoints, int attackPoints)
+        {
+            var content = sectionAdventure.Definition;
+            if (id != content.questId || healthPoints != content.questHealthPoints ||
+                attackPoints != content.questAttackPoints)
+                throw new ArgumentException("Quest reward does not match the section definition.", nameof(id));
+            if (!_progression.ClaimQuestReward(id, healthPoints, attackPoints)) return false;
+            SaveProgress();
+            return true;
+        }
+
+        public bool LootTreasure(string id, int healthPoints)
+        {
+            var content = sectionAdventure.Definition;
+            if (id != content.treasureId || healthPoints != content.treasureHealthPoints)
+                throw new ArgumentException("Treasure reward does not match the section definition.", nameof(id));
+            if (!_progression.LootTreasure(id, healthPoints)) return false;
+            SaveProgress();
+            return true;
+        }
+
+        public bool CompleteSection(string id)
+        {
+            if (id != sectionAdventure.Definition.sectionId) throw new ArgumentException("Unknown section.", nameof(id));
+            if (!_progression.CompleteSection(id)) return false;
+            SaveProgress();
+            return true;
         }
 
         public void HandleEnemyDefeated(EnemyDefeatRecord defeat)
@@ -593,6 +646,7 @@ namespace GrindHero
                 cameraFollow == null ||
                 movementInput == null ||
                 hud == null ||
+                sectionAdventure == null ||
                 exitGate == null)
             {
                 throw new InvalidOperationException("The first-slice scene is missing a required bootstrap reference.");

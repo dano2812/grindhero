@@ -8,7 +8,7 @@ namespace GrindHero.Infrastructure.Persistence
 {
     public sealed class JsonFilePlayerProgressRepository : IPlayerProgressRepository
     {
-        private const int CurrentSchemaVersion = 1;
+        private const int CurrentSchemaVersion = 2;
         private readonly string _savePath;
         private readonly string _backupPath;
 
@@ -108,8 +108,23 @@ namespace GrindHero.Infrastructure.Persistence
                 throw new InvalidDataException("The player save file could not be read.");
             }
 
+            Migrate(data);
             Validate(data);
             return data;
+        }
+
+        private static void Migrate(PlayerProgressData data)
+        {
+            if (data.schemaVersion != 1)
+            {
+                return;
+            }
+
+            data.acceptedQuestIds = Array.Empty<string>();
+            data.completedQuestIds = Array.Empty<string>();
+            data.lootedTreasureIds = Array.Empty<string>();
+            data.completedSectionIds = Array.Empty<string>();
+            data.schemaVersion = CurrentSchemaVersion;
         }
 
         private static void Validate(PlayerProgressData data)
@@ -132,6 +147,23 @@ namespace GrindHero.Infrastructure.Persistence
             }
 
             data.enemyRespawns = data.enemyRespawns ?? Array.Empty<EnemyRespawnData>();
+            ValidateIds(data.acceptedQuestIds);
+            ValidateIds(data.completedQuestIds);
+            ValidateIds(data.lootedTreasureIds);
+            ValidateIds(data.completedSectionIds);
+            foreach (var questId in data.completedQuestIds)
+            {
+                if (!data.firstBossDefeated || Array.IndexOf(data.acceptedQuestIds, questId) < 0)
+                {
+                    throw new InvalidDataException("A completed quest has invalid prerequisites.");
+                }
+            }
+
+            if (data.completedSectionIds.Length > 0 && !data.firstBossDefeated)
+            {
+                throw new InvalidDataException("A completed section requires boss completion.");
+            }
+
             foreach (var respawn in data.enemyRespawns)
             {
                 if (respawn == null ||
@@ -142,6 +174,23 @@ namespace GrindHero.Infrastructure.Persistence
                     (respawn.isAlive && respawn.nextRespawnUnixSeconds > 0))
                 {
                     throw new InvalidDataException("The player save contains invalid respawn data.");
+                }
+            }
+        }
+
+        private static void ValidateIds(string[] ids)
+        {
+            if (ids == null)
+            {
+                throw new InvalidDataException("The player save is missing content ID collections.");
+            }
+
+            var seen = new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal);
+            foreach (var id in ids)
+            {
+                if (string.IsNullOrWhiteSpace(id) || !seen.Add(id))
+                {
+                    throw new InvalidDataException("The player save contains invalid or duplicate content IDs.");
                 }
             }
         }

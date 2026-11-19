@@ -46,7 +46,8 @@ namespace GrindHero.Tests.PlayMode
         public IEnumerator LoadIsolatedFirstSliceScene()
         {
             DeleteTestSaveDirectory();
-            var loadOperation = SceneManager.LoadSceneAsync(TestScenePath, LoadSceneMode.Additive);
+            Screen.SetResolution(1440, 810, false);
+            var loadOperation = SceneManager.LoadSceneAsync(TestScenePath, LoadSceneMode.Single);
             Assert.That(loadOperation, Is.Not.Null, $"Could not load generated test scene at {TestScenePath}.");
             yield return loadOperation;
             yield return null;
@@ -58,6 +59,8 @@ namespace GrindHero.Tests.PlayMode
             var testScene = SceneManager.GetSceneByPath(TestScenePath);
             if (testScene.IsValid() && testScene.isLoaded)
             {
+                if (SceneManager.sceneCount == 1)
+                    SceneManager.CreateScene("Empty test harness");
                 var unloadOperation = SceneManager.UnloadSceneAsync(testScene);
                 if (unloadOperation != null)
                 {
@@ -88,6 +91,8 @@ namespace GrindHero.Tests.PlayMode
             Assert.That(bootstrapper.CombatWorld.AliveEnemyCount, Is.EqualTo(4));
             Assert.That(bootstrapper.CurrentHealth, Is.EqualTo(100f));
             Assert.That(bootstrapper.Gate.IsUnlocked, Is.False);
+            Assert.That(FindTestComponent<Canvas>().transform.Find("Dynamic joystick handle").gameObject.activeSelf,
+                Is.False, "The idle joystick must not cover the action.");
 
             EnemyActor boss = null;
             var activeEnemies = bootstrapper.CombatWorld.ActiveEnemies;
@@ -121,6 +126,165 @@ namespace GrindHero.Tests.PlayMode
             Assert.That(bootstrapper.IsPaused, Is.False);
             Assert.That(Time.timeScale, Is.EqualTo(1f));
             yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator HeroHealing_ContinuesDuringCombatButStopsWhenPausedOrDead()
+        {
+            var bootstrapper = FindTestComponent<GameBootstrapper>();
+            DisableSceneEnemies();
+            if (bootstrapper.IsPaused) bootstrapper.TogglePause();
+            var target = bootstrapper.CombatWorld.ActiveEnemies[0];
+            var targetView = target.GetComponentInChildren<StylizedActorView>();
+            TeleportHero(bootstrapper, target.transform.position + Vector3.back * 2f);
+            yield return null;
+            yield return null;
+            Assert.That(bootstrapper.Hero.CurrentTarget, Is.EqualTo(target));
+            Assert.That(targetView.targetRing.gameObject.activeSelf, Is.True);
+            bootstrapper.ReceiveHeroDamage(45f, DamageType.Axe);
+            var startHealth = bootstrapper.CurrentHealth;
+            var startTime = Time.time;
+            yield return new WaitForSeconds(0.5f);
+            Assert.That(bootstrapper.CurrentHealth - startHealth,
+                Is.EqualTo((Time.time - startTime) * 2f).Within(0.15f));
+            Assert.That(target.CurrentHealth, Is.LessThan(target.MaximumHealth),
+                "The hero should keep attacking while it heals.");
+            bootstrapper.TogglePause();
+            var pausedHealth = bootstrapper.CurrentHealth;
+            yield return new WaitForSecondsRealtime(0.15f);
+            Assert.That(bootstrapper.CurrentHealth, Is.EqualTo(pausedHealth));
+            bootstrapper.TogglePause();
+            Assert.That(bootstrapper.ReceiveHeroDamage(10000f, DamageType.Axe), Is.True);
+            Assert.That(targetView.targetRing.gameObject.activeSelf, Is.False,
+                "Dying must clear the old target highlight.");
+            yield return new WaitForSeconds(0.2f);
+            Assert.That(bootstrapper.CurrentHealth, Is.Zero);
+        }
+
+        [UnityTest]
+        public IEnumerator FirstSection_QuestTreasureBossAndExitFormACompleteReplaySafeLoop()
+        {
+            var bootstrapper = FindTestComponent<GameBootstrapper>();
+            var adventure = FindTestComponent<SectionAdventure>();
+            Assert.That(adventure, Is.Not.Null);
+            DisableSceneEnemies();
+            if (bootstrapper.IsPaused) bootstrapper.TogglePause();
+            bootstrapper.Hero.enabled = false;
+            TeleportHero(bootstrapper, adventure.Warden.position + Vector3.back);
+            yield return null;
+            yield return null;
+            Assert.That(bootstrapper.IsQuestAccepted(adventure.Definition.questId), Is.True);
+            TeleportHero(bootstrapper, adventure.Chest.position + Vector3.back);
+            yield return null;
+            yield return null;
+            Assert.That(adventure.IsChestOpen, Is.True);
+            Assert.That(bootstrapper.ProgressData.healthPoints, Is.EqualTo(3));
+            Assert.That(bootstrapper.LootTreasure(adventure.Definition.treasureId, 3), Is.False);
+            EnemyActor boss = null;
+            foreach (var actor in bootstrapper.CombatWorld.ActiveEnemies)
+                if (actor.Definition.IsBoss) boss = actor;
+            Assert.That(boss, Is.Not.Null);
+            boss.TakeDamage(10000f);
+            yield return new WaitForSeconds(2.1f);
+            Assert.That(bootstrapper.Gate.IsUnlocked, Is.True);
+            TeleportHero(bootstrapper, adventure.Warden.position + Vector3.back);
+            yield return null;
+            yield return null;
+            Assert.That(bootstrapper.IsQuestCompleted(adventure.Definition.questId), Is.True);
+            Assert.That(bootstrapper.ProgressData.healthPoints, Is.EqualTo(5));
+            Assert.That(bootstrapper.ProgressData.axeAttackPoints, Is.EqualTo(2));
+            TeleportHero(bootstrapper, bootstrapper.Gate.transform.position +
+                bootstrapper.Gate.transform.forward);
+            yield return null;
+            yield return null;
+            Assert.That(bootstrapper.IsSectionCompleted(adventure.Definition.sectionId), Is.True);
+            Assert.That(bootstrapper.CompleteSection(adventure.Definition.sectionId), Is.False);
+            Assert.That(bootstrapper.ClaimQuestReward(adventure.Definition.questId, 2, 2), Is.False);
+            var sectionId = adventure.Definition.sectionId;
+            var questId = adventure.Definition.questId;
+            var treasureId = adventure.Definition.treasureId;
+            yield return SceneManager.LoadSceneAsync(TestScenePath, LoadSceneMode.Single);
+            yield return null;
+            bootstrapper = FindTestComponent<GameBootstrapper>();
+            adventure = FindTestComponent<SectionAdventure>();
+            Assert.That(bootstrapper.IsQuestCompleted(questId), Is.True);
+            Assert.That(bootstrapper.IsSectionCompleted(sectionId), Is.True);
+            Assert.That(bootstrapper.IsTreasureLooted(treasureId), Is.True);
+            Assert.That(adventure.IsChestOpen, Is.True);
+            Assert.That(bootstrapper.Gate.IsUnlocked, Is.True);
+            Assert.That(bootstrapper.CombatWorld.AliveEnemyCount, Is.EqualTo(3));
+            Assert.That(bootstrapper.ProgressData.healthPoints, Is.EqualTo(5));
+            Assert.That(bootstrapper.ProgressData.axeAttackPoints, Is.EqualTo(2));
+        }
+
+        [UnityTest]
+        public IEnumerator FirstSection_RendersOriginalArtAndCapturesPreviewViews()
+        {
+            var bootstrapper = FindTestComponent<GameBootstrapper>();
+            var adventure = FindTestComponent<SectionAdventure>();
+            Assert.That(bootstrapper.Hero.GetComponentInChildren<StylizedActorView>(), Is.Not.Null);
+            Assert.That(GameObject.Find("Meadow island"), Is.Not.Null);
+            DisableSceneEnemies();
+            if (bootstrapper.IsPaused) bootstrapper.TogglePause();
+            bootstrapper.Hero.enabled = false;
+            yield return new WaitForSeconds(0.3f);
+            CapturePreview("mosswatch-opening");
+            TeleportHero(bootstrapper, adventure.Warden.position + Vector3.back);
+            yield return new WaitForSeconds(0.6f);
+            CapturePreview("mosswatch-story");
+            TeleportHero(bootstrapper, new Vector3(-5f, 0f, -5.3f));
+            yield return new WaitForSeconds(0.6f);
+            CapturePreview("mosswatch-grove");
+            TeleportHero(bootstrapper, new Vector3(6f, 0f, -1f));
+            yield return new WaitForSeconds(0.6f);
+            CapturePreview("mosswatch-guardian");
+            Assert.That(adventure.Definition.displayName, Is.Not.Empty);
+        }
+
+        private static void TeleportHero(GameBootstrapper bootstrapper, Vector3 position)
+        {
+            var controller = bootstrapper.Hero.GetComponent<CharacterController>();
+            controller.enabled = false;
+            bootstrapper.Hero.transform.position = position;
+            controller.enabled = true;
+        }
+
+        private static void CapturePreview(string name)
+        {
+#if UNITY_EDITOR
+            var camera = FindTestComponent<CameraFollow>().GetComponent<Camera>();
+            var canvas = FindTestComponent<GrindHero.Presentation.UI.HUDPresenter>().GetComponent<Canvas>();
+            var previousMode = canvas.renderMode;
+            var previousCamera = canvas.worldCamera;
+            var previousTarget = camera.targetTexture;
+            var previousActive = RenderTexture.active;
+            var target = RenderTexture.GetTemporary(1440, 810, 24);
+            var texture = new Texture2D(1440, 810, TextureFormat.RGB24, false);
+            try
+            {
+                camera.targetTexture = target;
+                canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                canvas.worldCamera = camera;
+                canvas.planeDistance = 1f;
+                Canvas.ForceUpdateCanvases();
+                camera.Render();
+                RenderTexture.active = target;
+                texture.ReadPixels(new Rect(0f, 0f, 1440f, 810f), 0, 0);
+                texture.Apply();
+                var folder = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "..", "..", ".artifacts"));
+                Directory.CreateDirectory(folder);
+                File.WriteAllBytes(Path.Combine(folder, name + ".png"), texture.EncodeToPNG());
+            }
+            finally
+            {
+                canvas.renderMode = previousMode;
+                canvas.worldCamera = previousCamera;
+                camera.targetTexture = previousTarget;
+                RenderTexture.active = previousActive;
+                RenderTexture.ReleaseTemporary(target);
+                UnityEngine.Object.Destroy(texture);
+            }
+#endif
         }
 
         [UnityTest]
@@ -482,10 +646,12 @@ namespace GrindHero.Tests.PlayMode
             Assert.That(bootstrapper.IsHeroRespawning, Is.True);
             Assert.That(bootstrapper.CurrentHealth, Is.Zero);
 
-            yield return new WaitForSeconds(0.3f);
+            var respawnDeadline = Time.time + 0.5f;
+            while (bootstrapper.IsHeroRespawning && Time.time < respawnDeadline)
+                yield return null;
             Assert.That(bootstrapper.IsHeroRespawning, Is.False);
             Assert.That(bootstrapper.Hero.IsRespawning, Is.False);
-            Assert.That(bootstrapper.CurrentHealth, Is.EqualTo(50f).Within(0.01f));
+            Assert.That(bootstrapper.CurrentHealth, Is.InRange(50f, 50f + Time.deltaTime * 2f + 0.01f));
             Assert.That(bootstrapper.Hero.transform.position, Is.EqualTo(spawnPosition));
         }
 

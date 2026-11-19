@@ -6,6 +6,16 @@ pins URP `17.6.0`. See [getting started](../docs/getting-started.md) for setup
 and [ADR-0001](../docs/adr/0001-unity-mobile-foundation.md) for the version
 decision.
 
+Open `Assets\_GrindHero\Scenes\FirstSlice.unity` to play Mosswatch Hollow.
+The first section includes original low-poly art, animated actors, the Warden
+main quest, a persistent grove chest, and a boss-gated eastern exit.
+Use WASD/arrows or click/touch and drag; combat is automatic. This is a
+development section, not device/performance or final-balance acceptance.
+
+Current authored definitions live under `_GrindHero\Data`, original art under
+`_GrindHero\Art`, and scene-authoring tools in `_GrindHero\Code\Editor`.
+The broader `Content` layout below is a target, not a second catalog to maintain.
+
 ## Project files
 
 The tracked Unity project lives here inside the repository. Keep `Assets`

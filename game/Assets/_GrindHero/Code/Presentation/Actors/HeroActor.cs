@@ -25,6 +25,7 @@ namespace GrindHero.Presentation
         private float _windupRemaining;
         private bool _attackInProgress;
         private EnemyActor _attackTarget;
+        private StylizedActorView _view;
         private readonly List<Material> _ownedMaterials = new List<Material>();
 
         public bool IsInitialized { get; private set; }
@@ -34,7 +35,6 @@ namespace GrindHero.Presentation
         private void Awake()
         {
             _controller = GetComponent<CharacterController>();
-            CreateGrayboxModel();
         }
 
         public void Initialize(
@@ -57,7 +57,27 @@ namespace GrindHero.Presentation
                 _tuning.startingWeapon.ValidateDefinition();
             }
 
-            CreateArmorVisuals();
+            if (_tuning.heroVisualPrefab != null)
+            {
+                var model = Instantiate(_tuning.heroVisualPrefab, transform);
+                _view = model.GetComponent<StylizedActorView>();
+                if (_view == null)
+                {
+                    throw new System.InvalidOperationException("The hero prefab needs its animated actor view.");
+                }
+                _view.attackRadius = _tuning.startingWeapon.attackRange;
+            }
+            else
+            {
+                CreateGrayboxModel();
+                CreateArmorVisuals();
+            }
+        }
+
+        public void ShowDamage(float damage)
+        {
+            if (_view != null) _view.Flash();
+            CombatFloatText.Show(transform.position, $"-{damage:0.#}", new Color(1f, 0.5f, 0.38f), transform);
         }
 
         public void BeginRespawn()
@@ -66,7 +86,9 @@ namespace GrindHero.Presentation
             _attackInProgress = false;
             _windupRemaining = 0f;
             _attackTarget = null;
+            if (CurrentTarget != null) CurrentTarget.SetTargeted(false);
             CurrentTarget = null;
+            if (_view != null) _view.CancelAttack();
             if (_weaponPivot != null)
             {
                 _weaponPivot.localRotation = Quaternion.identity;
@@ -141,9 +163,15 @@ namespace GrindHero.Presentation
                 return;
             }
 
+            var previousTarget = CurrentTarget;
             CurrentTarget = _combatWorld.FindClosestTarget(
                 transform.position,
                 weapon.attackRange);
+            if (previousTarget != CurrentTarget)
+            {
+                if (previousTarget != null) previousTarget.SetTargeted(false);
+                if (CurrentTarget != null) CurrentTarget.SetTargeted(true);
+            }
 
             if (_attackInProgress)
             {
@@ -165,6 +193,7 @@ namespace GrindHero.Presentation
             _attackInProgress = true;
             _windupRemaining = weapon.windupSeconds;
             _nextAttackStartTime = Time.time + weapon.attackCycleSeconds;
+            if (_view != null) _view.Windup(weapon.windupSeconds);
             FaceTarget(_attackTarget.transform.position);
             if (_weaponPivot != null)
             {
@@ -181,6 +210,7 @@ namespace GrindHero.Presentation
         {
             var weapon = _tuning.startingWeapon;
             _attackInProgress = false;
+            if (_view != null) _view.Strike();
             if (_weaponPivot != null)
             {
                 _weaponPivot.localRotation = Quaternion.identity;

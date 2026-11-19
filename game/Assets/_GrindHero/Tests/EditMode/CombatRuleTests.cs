@@ -9,6 +9,16 @@ namespace GrindHero.Tests.Domain
     public sealed class CombatRuleTests
     {
         [Test]
+        public void Healing_IsTimeBasedCappedAndCannotReviveADeadHero()
+        {
+            Assert.That(RecoveryRules.Heal(40f, 100f, 2f, 3f), Is.EqualTo(46f));
+            Assert.That(RecoveryRules.Heal(99f, 100f, 2f, 3f), Is.EqualTo(100f));
+            Assert.That(RecoveryRules.Heal(0f, 100f, 2f, 3f), Is.Zero);
+            Assert.That(RecoveryRules.Heal(40f, 100f, 2f, 0f), Is.EqualTo(40f));
+            Assert.Throws<ArgumentOutOfRangeException>(() => RecoveryRules.Heal(40f, 100f, float.NaN, 1f));
+        }
+
+        [Test]
         public void DamageResolver_SubtractsMatchingArmorAndClampsAtZero()
         {
             var result = DamageResolver.Resolve(100d, 5d, 15d, false, false, 0.8d);

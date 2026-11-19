@@ -25,13 +25,21 @@ not selected. Do not patch Unity package source or downgrade this project.
 Consider a future LTS only through a reviewed migration after a clean import,
 compile, tests, and platform builds succeed.
 
-The initial graybox slice is now generated at
+The playable Mosswatch Hollow first section is generated at
 `game\Assets\_GrindHero\Scenes\FirstSlice.unity`, with data assets, separate
 assemblies, a disabled test-scene entry, and EditMode/PlayMode test assemblies.
-The pinned Editor has passed the first-slice scene build, **9 EditMode tests**,
-and **1 PlayMode scene/pause smoke test**. This verifies Editor-side compilation
-and the prototype boot path only; Android/iOS builds, physical-device controls,
+The pinned Editor has passed scene authoring, **12 EditMode tests**, and
+**11 PlayMode tests**, including the story/treasure/boss/gate loop and reload.
+Original-art Editor previews were rendered and inspected. A local Android
+development APK is built as described below; iOS, physical-device behavior,
 and licensed CI have not been validated.
+
+Open `FirstSlice.unity` and press Play: move with WASD/arrows or click/touch and
+drag, approach the Warden's `!`, find the southern grove treasure, defeat the
+guardian, return to the Warden, and cross the eastern gate. Attacks are automatic;
+move out of the enemy's orange wind-up ring rather than trading every hit.
+Treasure stays visibly looted and section completion survives restart. The
+section remains playable afterward; there is no second map yet.
 
 ## Detailed bootstrap: Windows and this existing repository
 
@@ -135,7 +143,7 @@ into the repository root.
    Test Framework if not present. URP remains the rendering baseline. Review
    package compatibility through Unity Package Manager and commit its lockfile.
 3. **Completed locally:** assembly definitions, the generated first-slice
-   graybox, data assets, and EditMode/PlayMode test assemblies exist. The
+   section, original art/data assets, and EditMode/PlayMode test assemblies exist. The
    PlayMode setup temporarily enables `FirstSliceTestScene.unity` for the test
    run and restores it to disabled afterward, so it is not included in normal
    player builds. Rebuild generated content from **GrindHero > Build First
@@ -177,7 +185,7 @@ $Unity = 'C:\Program Files\Unity\Hub\Editor\<pinned-version>\Editor\Unity.exe'
 New-Item -ItemType Directory -Force .\.artifacts | Out-Null
 & $Unity -batchmode -nographics -projectPath "$PWD\game" -runTests -testPlatform EditMode -testResults "$PWD\.artifacts\editmode.xml" -logFile "$PWD\.artifacts\editmode.log"
 if ($LASTEXITCODE -ne 0) { throw 'EditMode tests failed; inspect the log and XML.' }
-& $Unity -batchmode -nographics -projectPath "$PWD\game" -runTests -testPlatform PlayMode -testResults "$PWD\.artifacts\playmode.xml" -logFile "$PWD\.artifacts\playmode.log"
+& $Unity -batchmode -projectPath "$PWD\game" -runTests -testPlatform PlayMode -testResults "$PWD\.artifacts\playmode.xml" -logFile "$PWD\.artifacts\playmode.log"
 if ($LASTEXITCODE -ne 0) { throw 'PlayMode tests failed; inspect the log and XML.' }
 ```
 
@@ -243,21 +251,38 @@ if ($LASTEXITCODE -ne 0) { throw 'APK installation failed.' }
 ```
 
 Launch the installed app and check touch movement/targeting, HP banners, enemy
-recovery, three-second hero respawn, mob cooldown markers, boss exit unlock,
+recovery, three-second hero respawn, mob cooldown markers, Warden dialogue,
+treasure visibility/open state, boss exit unlock, quest reward, eastern crossing,
 pause/background/resume, and save/relaunch. Record device model/OS and actual
 results; do not infer them from an Editor run. A 15-minute physical-device
 performance soak and an iOS build/install remain separate gates. Windows alone
 cannot produce a signed, device-installable iOS build.
 
-**Evidence (2026-11-19):** The build action succeeded with zero reported build
-warnings after the ASCII project/cache fixes. The APK is 39,948,059 bytes
-(about 38.1 MiB); its manifest identifies `com.grindhero.smoke`, version
-`0.1.0`/code `1`, and ARM64 native code. APK signature verification passed, and
-the package contains `libil2cpp.so`. SHA-256:
-`6DE6447A7BB9A7CD7A497A67491EAE442EB788F1FE42462E7F879FC0EAEF1732`.
+**Current Mosswatch evidence (2026-11-19):** The build action succeeded after
+the ASCII project/cache fixes. The APK is 55,438,130 bytes (about 52.9 MiB);
+its manifest identifies `com.grindhero.smoke`, version `0.1.0`/code `1`,
+minimum API 26, target API 36, and ARM64 native code. APK v2 signature
+verification passed, and the package contains `libil2cpp.so` and `libunity.so`.
+SHA-256:
+`0A8EA48D67DD13F3D5DD3F56AE4C60B8C5374344D902193944464C5B76826B0A`.
 These facts describe this local artifact, not a reproducible binary hash
 guarantee. No Android device was connected; installation, graphics, touch,
 suspend/resume, and performance on hardware remain unverified.
+
+**Section verification commands used:** the pinned Editor's batch
+`-executeMethod GrindHero.EditorTools.FirstSliceSceneBuilder.BuildFromCommandLine`
+with `-buildTarget StandaloneWindows64` and `-quit` passed. Batch `-runTests
+-testPlatform EditMode` passed 12 tests; batch `-runTests -testPlatform PlayMode`
+passed 11 tests (both without `-quit`, with graphics enabled). Reports/previews
+are `.artifacts\mosswatch-editmode.xml`, `mosswatch-playmode.xml`, and
+`mosswatch-*.png`. The Android command above passed; its current log is
+`.artifacts\mosswatch-android.log`. Repository checks, both PowerShell regression
+suites (12 cases each), and Unity readiness passed.
+
+Schema-1 saves migrate to schema 2 while retaining their existing gameplay data.
+The next successful save writes the new format. Before trying an older build,
+copy the save directory: older builds cannot load schema 2, and the ordinary
+rotating `.bak` is not a permanent pre-upgrade archive.
 
 ## Sources
 

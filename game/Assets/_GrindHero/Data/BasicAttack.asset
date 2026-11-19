@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8640b03a12f9f647a64940e94717b85, type: 3}
   m_Name: BasicAttack
   m_EditorClassIdentifier: GrindHero.Presentation::GrindHero.Presentation.Definitions.EnemyDefinition
+  visualPrefab: {fileID: 6202579248385439423, guid: 885da4f1a9dc0f14fa711ee6ada1938a, type: 3}
   stableId: enemy.basic.axe-attack
   displayName: "Basic \u2014 Axe Attack"
   archetype: 1

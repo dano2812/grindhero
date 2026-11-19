@@ -21,6 +21,21 @@ quarantine only with an issue, owner, and expiry.
 
 ## Critical regression cases
 
+The current first-section suites contain 12 EditMode and 11 PlayMode tests.
+They cover healing and combat rules, persistence/backup recovery, schema-1
+migration, idempotent treasure/quest rewards, section prerequisites, and the
+authored scene's quest/treasure/boss/gate loop across a scene reload. The
+progression integration test directly defeats the boss; it is not evidence
+that a human has balanced or completed the combat encounter.
+
+PlayMode tests load their isolated scene in single-scene mode so the Editor's
+currently open scene cannot contribute duplicate actors, cameras, or saves.
+The graphics-capable preview test renders 1440x810 opening, dialogue, grove,
+and guardian views into ignored `.artifacts/mosswatch-*.png`. These are staged
+Editor views with actors held still, not device screenshots. Inspect the
+images rather than treating successful PNG output as a visual-quality assertion.
+Use a graphics-capable run (omit `-nographics`) for this suite.
+
 - Combat: zero/dead health, damage boundaries, equipment changes, repeated death,
   pause/resume, and invalid stat data.
 - Loot/inventory: deterministic boundary draws, zero/invalid weights, quantities,
@@ -37,6 +52,35 @@ quarantine only with an issue, owner, and expiry.
 - Purchases later: pending/cancelled/declined, retry after grant before
   acknowledgement, reinstall/restore, duplicate token, account mismatch,
   refund/revocation, offline cached entitlement expiry, and sandbox failures.
+
+## Required difficulty and progression pacing tool
+
+The owner requires a development tool for calculating/testing each location's
+difficulty and farming time to boss readiness. Its authoritative requirements
+and illustrative early/late pacing examples are in the
+[gameplay specification](gameplay-specification.md#required-difficulty-and-progression-pacing-tool).
+This tool is a required development deliverable, not yet implemented.
+
+When developed, use it during location balancing and after changes to combat
+stats, stat growth, rewards, respawn allowances, or encounter prerequisites.
+Reports must retain the input-data version and scenario assumptions, separate
+active-play time from calendar time, and make impossible or blocked progression
+explicit. Include known-weakness quest-mob scenarios as their rules become
+specified, rather than treating every enemy as a stationary HP comparison.
+
+Verify the tool itself with small, independently calculable reference scenarios,
+cooldown/daily-reset boundaries, and unreachable-boss cases. Compare its combat
+and progression predictions with the actual game before relying on long-horizon
+estimates. Exact acceptance tolerances and CI enforcement are not decided.
+Model output complements, but never replaces, human combat/fun review or
+physical-device verification.
+
+The required baseline scenario uses no purchases or paid boosts and must show
+that all progression remains achievable free-to-play. Apply the illustrative
+early/late pacing targets to this baseline. When products are specified,
+compare optional paid acceleration separately: it may shorten time/effort, but
+must not be necessary for a quest, boss, location/map unlock, or completion.
+Flag any paid-only prerequisite or unreachable free progression as a defect.
 
 ## Performance budgets (initial targets, not verified claims)
 

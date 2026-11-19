@@ -17,6 +17,8 @@ MonoBehaviour:
   baseAxeDamage: 15
   axeDamagePerPoint: 1
   movementSpeed: 4.5
+  healingPerSecond: 2
+  heroVisualPrefab: {fileID: 2975782911930818027, guid: 059d2ef8cc0aca8459dda25dea977c35, type: 3}
   startingDodgeChance: 0
   startingBlockChance: 0
   blockDamageMultiplier: 0.8

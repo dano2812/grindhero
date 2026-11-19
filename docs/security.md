@@ -75,6 +75,12 @@ Require manual approval for production distribution, never sign arbitrary PRs.
 Maintain sanitized logs, store-event auditability, incident response, support
 contact, and account deletion where applicable before purchase launch.
 
+The owner requires alignment with applicable AI legislation. Before release,
+assess actual AI use, operator roles, transparency, manipulation risks, and
+related data/IP obligations using the
+[AI-assisted development and provenance guidance](ai-usage.md).
+This is a release-review requirement, not a completed legal compliance claim.
+
 ## References
 
 - [Unity IAP verification](https://docs.unity.com/en-us/iap/receipt-validation)

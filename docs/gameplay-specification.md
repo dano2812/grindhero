@@ -98,9 +98,9 @@ what "fixed" means to you:
 - [ ] Each weapon uses a different input/attack pattern
 - [ ] Please recommend
 - No active skills in the first slice. Dodge and block are passive defensive
-  chance checks earned through stat points; see section 6. Hero healing will
-  be automatic and always active, not a manual control (owner clarification,
-  2026-11-19; not yet implemented).
+  chance checks earned through stat points; see section 6. Hero healing is
+  automatic and always active while alive, not a manual control (owner
+  clarification, 2026-11-19; implemented with provisional 2 HP/second tuning).
 
 **Touch controls that must always be reachable:** [Your answer]  
 **Accessibility or control options important from the first slice:** [Your answer]
@@ -390,13 +390,13 @@ the desired relative effect; we can tune numbers in a device-tested prototype.
 
 ### Current first-slice implementation values (prototype only; not owner sign-off)
 
-The generated graybox uses the following adjustable ScriptableObject values.
+The generated first section uses the following adjustable ScriptableObject values.
 They are implementation assumptions to make the loop playable and testable;
 they are not approved final balance or a commitment to the starting loadout.
 
 | Actor/content | Current prototype values |
 | --- | --- |
-| Hero | 100 starting max HP; 15 base Axe damage + 5 axe-weapon damage; 1-second attack cycle with 0.25-second wind-up; starts with 2 head and 3 torso Axe armor equipped; 0% dodge/block; block multiplier 0.8; defeat respawn at 50% max HP |
+| Hero | 100 starting max HP; 15 base Axe damage + 5 axe-weapon damage; 1-second attack cycle with 0.25-second wind-up; starts with 2 head and 3 torso Axe armor equipped; 0% dodge/block; block multiplier 0.8; defeat respawn at 50% max HP; 2 HP/second healing while alive |
 | Basic — HP | 80 HP; 11 Axe damage; 0.5-second wind-up; 2.1 attack / 4.2 focus range; 3.2 movement speed; drops 1 permanent HP point (+5 max HP); 120-second respawn cooldown |
 | Basic — Axe Attack | 80 HP; 13 Axe damage; 2.1 attack / 4.2 focus range; otherwise shares the Basic HP profile; drops 1 permanent Axe Attack point (+1 base Axe damage); 120-second respawn cooldown |
 | Advanced | 180 HP; 18 Axe damage; 0.65-second wind-up; 2.25 attack / 4.5 focus range; 3.4 movement speed; no stat reward yet; 300-second respawn cooldown |
@@ -408,8 +408,60 @@ HP per second while returning, capped at full HP. If they reach spawn before
 full health, they continue healing while idle until full.
 The three-respawn cap is currently **per spawn point per UTC calendar day**.
 That cap and UTC reset remain implementation assumptions for owner review.
-The first-slice project does not yet contain the five-slot inventory system,
-quests, treasures, story content, or equipment drops.
+Mosswatch includes the first main quest, grove treasure, and short story
+described in section 11. The five-slot inventory system and equipment drops
+remain unimplemented.
+
+### Required difficulty and progression pacing tool
+
+**Owner requirement, 2026-11-19:** A difficulty/progression calculation and
+testing tool must be part of development, not an optional task after content
+is finished. It must help calculate and tune how much farming is needed in
+each location before the hero can defeat its boss.
+
+**Illustrative pacing targets, not final balance or current behavior:**
+
+| Progression point | Owner's example |
+| --- | --- |
+| First location, Mosswatch Hollow | Roughly 1 hour of play, farming the available mobs, before the hero is ready to defeat the boss. |
+| Final location, The Eclipse Throne | Roughly 1-3 months of farming progression before the hero is ready to defeat the boss. |
+
+These are examples to evaluate with the tool, not approved exact durations,
+mandatory waiting timers, or a claim that the current slice meets them.
+"Final map" follows the clarified location terminology: the final location
+within this map. Whether the month-scale example means elapsed calendar time
+or accumulated active play, and the assumed daily play schedule, remain to be
+specified.
+
+The baseline must be **free-to-play, with no paid progression boosts**.
+Evaluate the early/late pacing examples against that baseline. Future paid
+acceleration may shorten progression, but must never be required to reach a
+boss, complete a quest, unlock a location/map, or finish the game.
+
+The required tool must:
+
+- Estimate per-location combat difficulty, stat growth, farming effort, and
+  time to boss readiness from an explicit expected hero entry state, retaining
+  progress earned in earlier locations rather than assuming a fresh hero.
+- Use the game's authored balance data and gameplay rules: combat stats and
+  timing, armor/healing, enemy rewards, respawn cooldowns, daily allowances,
+  and offline cooldown passage. Account for treasure/quest rewards and
+  weakness-based quest encounters as those designs become specified.
+- State player-behavior assumptions, including combat skill, use of weaknesses,
+  farming routes/backtracking, optional rewards, deaths/retries, and play
+  frequency. Do not present one unexplained estimate as universal.
+- Distinguish active play/farming time from elapsed calendar time, including
+  waiting imposed by cooldowns and daily limits.
+- Produce repeatable reports showing assumptions, relevant balance-data
+  version, expected boss-readiness progression, and comparison with configured
+  pacing targets. Flag unreachable progression or conflicting limits instead
+  of returning a misleading completion-time estimate.
+
+Tool interface, calculation/simulation approach, exact skill/session scenarios,
+boss-readiness criteria, target durations/tolerances for every location, and
+automation/CI integration remain design work. The tool must inform balancing
+alongside playtesting; it does not prove that a long grind is enjoyable.
+**Status: required future development deliverable; not implemented.**
 
 ## 7. Sections, exploration, quests, and story
 
@@ -419,6 +471,44 @@ quests, treasures, story content, or equipment drops.
 - Do ordinary enemies respawn when the player returns? There is respawn cooldown (also running when the player is not in the game)
 - Are there checkpoints or safe areas? No
 - Precisely what unlocks the next section?Defeating boss unlocks new section, in first slice there will be only one location
+
+### Approved world progression and location themes
+
+**Owner-approved direction, 2026-11-19:** One large, connected world with the
+following 20 themed locations in progression order. Location 1 is the starting
+region. Defeating a location's boss permanently unlocks the next location,
+which is harder and supports further hero progression. After unlocking a
+location, the hero can freely cross between it and previously unlocked
+locations; advancing does not close earlier routes. Location unlocks must
+survive saving and restarting.
+
+The names, themes, and sequence below are approved world-design direction,
+not a claim that all 20 locations are built. Only Mosswatch Hollow is currently
+implemented. Exact geography, connecting paths, later bosses, enemy rosters,
+quests, rewards, and difficulty values remain to be designed.
+
+| Order | Location | Theme and visual identity |
+| --- | --- | --- |
+| 1 | Mosswatch Hollow | Overgrown woodland ruins, mossy stones, lantern paths, and an abandoned watchtower. |
+| 2 | Goldenfield Marches | Autumn farmland with enormous wheat fields, deserted windmills, and ruined estates. |
+| 3 | Whisperfen Marsh | Misty wetlands, crooked trees, glowing reeds, and villages built on stilts. |
+| 4 | Wreckwater Coast | Rugged beaches, shattered ships, sea caves, and a weathered lighthouse. |
+| 5 | Coral Crown | Exposed coral terraces, turquoise tidal pools, giant shells, and pearl-white ruins. |
+| 6 | Sunscar Dunes | Golden desert, half-buried monuments, oasis gardens, and sun-bleached bones. |
+| 7 | Redfang Canyon | Towering red cliffs, narrow ravines, rope bridges, and cliffside settlements. |
+| 8 | The Silent Necropolis | An ancient burial city filled with monumental tombs, statues, and spectral lanterns. |
+| 9 | Sporelight Grotto | Underground mushroom forests, luminous spores, tangled roots, and enormous fungal shelves. |
+| 10 | Prismheart Depths | Vast crystal caverns with gemstone formations, underground rivers, and refracted light. |
+| 11 | Ironroot Foundry | A subterranean industrial complex of colossal furnaces, rusted machinery, and ore railways. |
+| 12 | Thunderstep Highlands | Windswept grasslands, standing stones, storm-dark skies, and lightning-scarred ridges. |
+| 13 | Frostbound Pass | Snow-covered mountain trails, frozen fortifications, avalanche slopes, and ancient watchfires. |
+| 14 | The Mirror Expanse | A vast frozen lake with glasslike ice, trapped ruins, and shimmering auroras. |
+| 15 | Skyreach Gardens | Mountaintop sanctuaries connected by stone bridges, with hanging gardens above the clouds. |
+| 16 | Embermaw Caldera | An active volcanic basin of black basalt, flowing lava, sulfur vents, and scorched temples. |
+| 17 | The Bannerless Fields | An enormous ancient battlefield scattered with broken siege engines, fallen standards, and giant armor. |
+| 18 | Clockwork Meridian | An abandoned mechanical city of brass towers, exposed gears, canals, and astronomical instruments. |
+| 19 | Starfall Basin | A meteor-shattered landscape with glowing celestial fragments, twisted stone, and strange vegetation. |
+| 20 | The Eclipse Throne | A dark royal stronghold surrounding an eclipsed sun, with black marble, pale gold, and fractured monuments. |
 
 **First-slice mob respawn rules:**
 - Basic mobs: 2-minute respawn cooldown.
@@ -444,6 +534,55 @@ quests, treasures, story content, or equipment drops.
 - Can optional quests be failed or abandoned? No optional quests now., Just the main story quest
 - What should quest rewards/progression be? Stat rewards and unlocking special areas
 
+### Location quest giver and summoned quest mobs
+
+**Owner-confirmed direction, 2026-11-19; documentation only, not implemented.**
+The owner clarified that quest-mob counts increase across the **locations
+within each map**, not across separate multi-location maps. These encounters
+are distinct from the bosses that unlock neighboring locations.
+
+- Each location has a quest-giver NPC who summons a staged sequence of quest
+  mobs. Location N has N quest mobs: Mosswatch Hollow has 1, Goldenfield Marches
+  has 2, and The Eclipse Throne (location 20) has 20.
+- Quest mobs are fought sequentially. Defeating the current stage makes the
+  next stage available; it does not summon the next mob automatically.
+- Summoning is always player-requested: the hero must visit the location's
+  quest giver and explicitly confirm the summon. This applies to the first
+  stage, each subsequent stage, and retries.
+- If a quest mob kills the hero, that mob disappears. It does not automatically
+  respawn when the hero revives. The hero must return to the quest giver and
+  confirm another summon to retry the undefeated stage.
+- A failed attempt does not advance the sequence or undo completed stages.
+- Each quest mob must be unique in some meaningful way, rather than relying
+  only on a larger HP pool.
+- A quest mob is highly durable/resistant relative to the hero strength
+  expected when it becomes available, but has a discoverable weakness.
+- Finding and exploiting that weakness must make victory achievable before
+  the hero is strong enough to defeat the relevant boss. These encounters
+  should reward understanding the weakness, not require out-grinding their
+  baseline resistance.
+- Defeating any quest mob grants a substantially greater reward than an
+  ordinary mob. Reward each completed encounter, not only the end of the
+  entire sequence.
+- Future quest-stage and reward persistence must follow the existing
+  requirement that gameplay progress survives restarting.
+
+**Details deliberately deferred:** NPC identity/placement and whether this
+is the existing Warden or another NPC; relationship to the main story and
+whether encounters are optional or required; encounter
+availability beyond the preceding-stage prerequisite;
+mob identities, distinctive traits, weaknesses and discovery clues;
+resistance/HP/damage values; which boss is the balance benchmark; reward
+types/amounts; replaying already-completed stages and reward-claim rules;
+re-summoned mob health/state; leaving an active encounter, quitting/reloading,
+or the hero dying to another enemy; simultaneous defeats; and summon limits
+or costs, if any.
+
+This adds a future encounter requirement to the earlier main-story-only quest
+scope; it does not yet settle whether it belongs to that main quest or is a
+separate challenge. It does not replace the approved boss-unlock rules or
+change the currently implemented Mosswatch quest.
+
 **Treasures and secrets:**  
 - What can a hidden treasure contain?Percentage boost of stats or stats directly (permanent)
 - Should secrets be hinted at, discoverable by observation, or very obscure?
@@ -458,6 +597,17 @@ quests, treasures, story content, or equipment drops.
 - How should story be presented (short dialogue, scenes, environmental clues)?Short dialoque 
   
 - Any themes/content to include or avoid? Don't have any in mind, recommend something
+
+**Campaign continuation requirement (owner, 2026-11-19):** Completing all
+20 locations on this map unlocks the next map with new locations. The story must
+resolve this map's main conflict while leaving room for the hero's continuing
+journey.
+
+The proposed campaign, **The Unbroken Road**, is documented in the
+[story draft](story.md), with an overarching plot, a beat for every approved
+location, a complete first-map ending, and a next-map hook. Its new names,
+characters, lore, and plot are proposals awaiting owner review, not approved
+canon or implemented gameplay. Existing Mosswatch dialogue is preserved.
 
 ## 8. Progress persistence and offline behavior
 
@@ -489,16 +639,27 @@ future requirements rather than relying on a local file to prove a purchase.
 
 ## 10. Future business decisions (can wait until after the MVP)
 
-- Is the game intended to be free, paid upfront, or undecided? [Your answer]
+- Is the game intended to be free, paid upfront, or undecided? Free-to-play;
+  the player must be able to complete the entire game without spending money.
 - Are in-app purchases only cosmetic, convenience, expansion content, or
-  undecided? [Your answer]
+  undecided? Optional progression acceleration only: purchases speed up progress
+  rather than make completion possible.
 - What must never be sold or randomized for money? [Your answer]
 - Should the game ever include ads? (Currently excluded.) [Your answer]
 - Is online account/cloud progress a future requirement? [Your answer]
 
-No purchase, premium currency, ad integration, analytics SDK, or account system
-should be built until these choices and the security/privacy requirements are
-reviewed.
+**Owner-confirmed monetization principle, 2026-11-19:** All locations/maps,
+story progression, quests, and boss victories must remain achievable without
+paying. Do not require a paid item, boost, quest-mob weakness solution, or
+content unlock to complete the game. Purchases may reduce the time/effort needed
+to progress, not create a paid-only completion path.
+
+Specific products, pricing, acceleration amounts/durations, limits, and economy
+details remain undecided. This direction does not authorize implementation now:
+no purchase, premium currency, ad integration, analytics SDK, or account system
+should be built until the remaining product decisions and security/privacy
+requirements are reviewed. Existing future purchase-authority requirements
+remain unchanged.
 
 ## 11. Acceptance examples
 
@@ -543,6 +704,40 @@ Write player-visible rules in this format:
 13. Given the hero and living mobs are visible, then each has a banner above its
     figure showing its name, current/max HP, and health-bar fill; when a mob is
     defeated, its banner is removed.
+14. Given the hero is alive, then automatic healing continues during movement
+    and combat, capped at maximum HP; pause and the death countdown do not heal.
+15. Given the Warden's quest is accepted and the boss defeated, approaching the
+    Warden grants the authored stat reward once; restarting cannot repeat it.
+16. Given the boss is defeated, crossing the eastern gate records first-section
+    completion; the section stays explorable without pretending a second map
+    exists.
+
+### Implemented first-section realization (2026-11-19)
+
+The owner requested completion of the first map section including graphics.
+The following are assistant-selected, reversible realization/content values,
+not replacements for the owner's answers or final balance approval:
+
+| Content | Current implementation |
+| --- | --- |
+| Section | Mosswatch Hollow; original low-poly woodland ruins, camp, lantern road, guardian dais, and eastern gate |
+| Hero | Armored Vanguard silhouette with the existing axe/head/torso loadout; walking and attack animation |
+| Ordinary enemies | Mossbound/HP, Ironbound/Axe Attack, and Ruin Keeper/Advanced silhouettes; existing stable IDs, stats, rewards, and respawn rules preserved |
+| Boss | Hollow Guardian; existing ordinary-mob-style behavior with higher HP/damage, no new boss phase or extra drop |
+| Main story | “The silent watch”; approach the Warden's `!` at the western camp to accept, defeat the guardian, return for a short conclusion |
+| Quest reward | Once-only +2 permanent Health points and +2 Axe Attack points; quest completion is not an extra boss-gate requirement |
+| Treasure | Southern grove, hinted by pale stones and an inscription; once-only +3 permanent Health points, visibly open/looted afterward |
+| Hero healing | 2 HP/second while alive, including combat; active gameplay time only; capped at max HP, never revives a dead hero |
+| Presentation | Fixed-angle following camera, target/wind-up rings, hit feedback, damage numbers, projected HP banners, safe-area HUD, nonmodal dialogue, circular touch joystick |
+| Completion | Cross eastward through the opened gate; persist completion and allow continued exploration/grinding in this section |
+
+Healing-point sources/scaling remain unspecified; the base healing rate does
+not invent such a source. Ordinary enemy values remain provisional and the
+guardian is intended to require movement/timing rather than stationary trading.
+No new weapon catalog, inventory, skin progression, second section, audio pack,
+monetization, or online system is implied. Art provenance and references are in
+the [asset ledger](assets.md); decisions and save compatibility are in the
+[decision log](decision-log.md).
 
 ## 12. Open questions and sign-off
 

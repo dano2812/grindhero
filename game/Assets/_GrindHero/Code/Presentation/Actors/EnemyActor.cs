@@ -26,6 +26,7 @@ namespace GrindHero.Presentation
         private CombatWorld _combatWorld;
         private EnemySpawnPoint _spawnPoint;
         private Renderer _bodyRenderer;
+        private StylizedActorView _view;
         private Color _baseColor;
         private BehaviorState _state;
         private float _nextAttackStartTime;
@@ -40,6 +41,8 @@ namespace GrindHero.Presentation
         public float MaximumHealth => _definition != null ? _definition.maximumHealth : 0f;
         public string DisplayName => _definition != null ? _definition.displayName : name;
         public EnemyDefinition Definition => _definition;
+        public float HealthBannerHeight => _definition != null && _definition.visualPrefab != null
+            ? 2.75f * _definition.visualPrefab.transform.localScale.y : 2.75f;
 
         public void Initialize(
             EnemyDefinition definition,
@@ -72,8 +75,27 @@ namespace GrindHero.Presentation
             _nextAttackStartTime = Time.time;
             _postKillRetreatRemaining = 0f;
             _baseColor = definition.grayboxColor;
-            CreateGrayboxModel();
+            if (definition.visualPrefab != null)
+            {
+                var model = Instantiate(definition.visualPrefab, transform);
+                _view = model.GetComponent<StylizedActorView>();
+                if (_view == null)
+                {
+                    throw new InvalidOperationException("The enemy prefab needs its animated actor view.");
+                }
+
+                _view.attackRadius = definition.attackRange;
+            }
+            else
+            {
+                CreateGrayboxModel();
+            }
             _combatWorld.Register(this);
+        }
+
+        public void SetTargeted(bool targeted)
+        {
+            if (_view != null) _view.SetTargeted(targeted);
         }
 
         public void TakeDamage(float damage)
@@ -86,6 +108,8 @@ namespace GrindHero.Presentation
             CurrentHealth = Mathf.Max(0f, CurrentHealth - damage);
             _flashRemaining = 0.12f;
             SetBodyColor(Color.white);
+            if (_view != null) _view.Flash();
+            CombatFloatText.Show(transform.position, $"{damage:0.#}", new Color(1f, 0.89f, 0.53f), transform);
 
             var distanceToHero = HorizontalDistance(transform.position, _hero.position);
             if (_state == BehaviorState.Chasing || _state == BehaviorState.Returning ||
@@ -275,6 +299,7 @@ namespace GrindHero.Presentation
                 if (_windupRemaining <= 0f)
                 {
                     _attackInProgress = false;
+                    if (_view != null) _view.Strike();
                     SetBodyColor(_baseColor);
 
                     if (HorizontalDistance(transform.position, _hero.position) <= _definition.attackRange)
@@ -298,6 +323,7 @@ namespace GrindHero.Presentation
             _attackInProgress = true;
             _windupRemaining = _definition.windupSeconds;
             _nextAttackStartTime = Time.time + _definition.attackCycleSeconds;
+            if (_view != null) _view.Windup(_definition.windupSeconds);
             SetBodyColor(Color.Lerp(_baseColor, new Color(1f, 0.35f, 0.12f), 0.8f));
 
             if (_windupRemaining <= 0f)
@@ -348,6 +374,7 @@ namespace GrindHero.Presentation
         private void CancelAttackTelegraph()
         {
             _attackInProgress = false;
+            if (_view != null) _view.CancelAttack();
             _windupRemaining = 0f;
             SetBodyColor(_baseColor);
         }

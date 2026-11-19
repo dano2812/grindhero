@@ -4,9 +4,9 @@ A mobile, fixed-camera 3D action RPG for iOS and Android, built with Unity and C
 The player fights enemies, gains stats and loot, completes quests, discovers
 secrets, and defeats bosses to unlock connected map sections.
 
-**Status: first-slice graybox Editor-tested and Android smoke APK built; not yet
-validated on mobile devices.** The Unity project is in `game/`, pinned to Editor
-`6000.6.5f1` and URP `17.6.0`. It passes 9 EditMode tests and 8 PlayMode
+**Status: Mosswatch Hollow, the first playable section, is implemented and
+Editor-tested; not yet validated on mobile devices.** The Unity project is in `game/`, pinned to Editor
+`6000.6.5f1` and URP `17.6.0`. It passes 12 EditMode tests and 11 PlayMode
 tests, and the repository readiness precheck passes. A local debug-signed
 IL2CPP/ARM64 APK is available; see [Android smoke builds](docs/getting-started.md#local-android-smoke-apk).
 iOS builds, physical-device testing, and licensed CI remain open.
@@ -25,7 +25,7 @@ No backend or purchasing SDK is installed.
 
 | Path | Responsibility |
 | --- | --- |
-| `game/` | Unity project and first-slice graybox prototype |
+| `game/` | Unity project, original low-poly art, and playable first section |
 | `docs/` | Design, architecture, decisions, roadmap, and operational guidance |
 | `scripts/` | Dependency-free PowerShell repository and Unity-readiness checks |
 | `.github/` | CI workflows, issue/PR templates, and Copilot app instructions |
@@ -54,8 +54,26 @@ use `pwsh` and omit `-ExecutionPolicy Bypass`. The Unity readiness check validat
 project files, package pins, metadata, assemblies, test presence, and the build
 scene; it does not compile or run the game. Editor test commands and current
 results are in [getting started](docs/getting-started.md). Those tests cover
-rules, persistence, scene boot/pause, health banners, recovery, and respawn
-indicators, not full device behavior or final combat balance.
+rules, save migration, scene boot/pause, health banners, recovery, respawn
+indicators, and the story/treasure/boss/exit loop across reload. Rendered Editor
+previews are captured and inspected; this is not physical-device evidence or
+final combat-balance approval.
+
+## Play Mosswatch Hollow
+
+Open `game\Assets\_GrindHero\Scenes\FirstSlice.unity` and press **Play**.
+Move with WASD/arrows, or click/touch and drag; nearby enemies are attacked
+automatically. Approach the Warden's `!` to start the main story, follow the
+lanterns east, explore the southern grove, defeat the Hollow Guardian, and
+return to the Warden before crossing the eastern gate. Quest turn-in is
+optional for opening the gate. The completed section remains explorable;
+a second map is not implemented.
+
+The woodland ruins, characters, equipment silhouettes, chest, and effects are
+original project-created low-poly art. See the [asset ledger](docs/assets.md)
+for provenance and the mobile-presentation references. Progress, looted
+treasure, and quest/section completion persist; schema-1 graybox saves migrate
+without resetting stats or cooldowns.
 
 ## AI-assisted development
 
@@ -73,10 +91,12 @@ and future in-app purchases.
 Starting architecture: single-player offline gameplay, Universal Render Pipeline
 (URP), GameObjects rather than ECS, and data-driven content. Offline-first is a
 starting assumption, not a promise of cloud sync, multiplayer, or a trusted
-offline paid economy. The graybox currently uses landscape orientation,
+offline paid economy. The first section currently uses landscape orientation,
 one-finger virtual-joystick movement, and automatic nearby targeting; control
 feel and the supported device floor still require owner review and physical
-testing. Business-model decisions remain open. The project Editor is pinned to
+testing. Full free-to-play completion and optional paid progression acceleration
+are confirmed; specific products/pricing remain open. No purchases are implemented.
+The project Editor is pinned to
 Unity `6000.6.5f1` (Unity 6.6 Update) in ADR-0001.
 
 The `game/` directory contains the Unity project and its pinned package

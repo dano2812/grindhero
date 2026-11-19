@@ -256,6 +256,239 @@ original timestamps were not retained.
   device handoff are in the getting-started guide. No device was connected;
   device acceptance is not implied by a successful APK build.
 
+### DEC-013 - Complete the first authored section now
+
+- **Date:** 2026-11-19.
+- **Decision maker:** Owner.
+- **Decision:** Continue implementation through the whole first map section,
+  including attractive graphics informed by other mobile games.
+- **Scope:** Realize the existing combat, main-story NPC, permanent-stat treasure,
+  and boss-gated exploration in one playable section. This supersedes DEC-011's
+  sequencing restriction on first-section content, not the physical-device,
+  iOS, licensed-CI, performance, or release gates.
+- **Non-goals:** A second map, a broader item/inventory/skin system, new boss
+  phases, third-party asset purchases, online services, monetization, or release
+  publishing. These still require their own scope and decisions.
+
+### DEC-014 - Original low-poly Mosswatch presentation
+
+- **Date:** 2026-11-19.
+- **Decision maker:** Assistant, realization under DEC-013.
+- **Context/options:** Replace the graybox with original editor-authored art
+  rather than copying reference-game assets or blocking on an external art pack.
+- **Decision:** Mosswatch Hollow is a stylized woodland-ruins island with
+  faceted pines, a lantern road, a Warden camp, a southern grove, a guardian dais,
+  and an eastern gateway. Use a moss/teal/stone/gold palette, shared meshes and
+  materials, six segmented character prefabs, and a fixed 55-degree orthographic
+  camera (size 8, clamped following focus).
+- **Readability:** Walk/axe animation, target highlighting, expanding wind-up
+  rings, small damage numbers, brief hit flashes, projected HP banners, and
+  edge-anchored safe-area HUD plates. Dialogue is short and nonmodal. Hide both
+  joystick pieces when idle; use an original circular disc when dragging.
+  Keep the treasure clearing free of foreground trees. Match hero/mob attack
+  ring radii to their authored weapon/range, and clear the old target highlight
+  when the hero dies.
+- **Research:** Archero's official listing and the Mighty Doom designer case
+  study informed general silhouette/HUD/readability principles only. Links and
+  provenance are in the [asset ledger](assets.md); no external art was copied.
+- **Consequences/status:** Unity Editor APIs generate meshes, prefabs, definitions,
+  and scenes while preserving existing GUIDs. Authoring is an explicit action,
+  not part of every APK build. Scenery uses static renderers, not static
+  billboard labels or the moving chest/NPC. Rendered opening, story, grove, and
+  guardian previews were inspected and used to correct occlusion/framing.
+  Device performance, accessibility/feel, and final art approval remain open.
+
+### DEC-015 - First-section story, discovery, and hero recovery values
+
+- **Date:** 2026-11-19.
+- **Decision maker:** Assistant realization/tuning; the owner selected automatic
+  healing, an exclamation-mark quest giver, main story, permanent-stat treasure,
+  and an ordinary-mob-style stronger boss in the worksheet.
+- **Decision:** Approach the Warden to accept “The silent watch”; defeat the
+  Hollow Guardian and return for once-only +2 Health and +2 Axe Attack points.
+  A pale-stone trail/inscription hints at a southern chest worth +3 permanent
+  Health points; it remains visibly open once looted. Cross the opened eastern
+  gate to record completion and keep exploring. Boss defeat alone still opens
+  the gate; turning in the quest is not an extra unlock prerequisite.
+- **IDs:** `section.mosswatch`, `quest.mosswatch.warden`, and
+  `treasure.mosswatch.grove`. Existing enemy/spawn IDs and combat/respawn rules
+  are preserved. Story/rewards are authored in `Mosswatch.asset`, not save labels.
+- **Healing:** Start at 2 HP/second, active while alive including combat, capped
+  at max HP, paused with gameplay time and inactive during the death countdown.
+  Returning mobs retain their separate 10%-of-max-HP/second rule. This implements
+  the owner's healing direction; the numeric base is provisional, with no
+  invented Healing-point source or scaling.
+- **Consequences:** Quest and treasure claims are idempotent application-layer
+  operations; reward totals are computed before assigning state. Dialogue and
+  chest state bind to saved IDs. A second section and new equipment mechanics
+  are not implied. The guardian still needs human combat-balance review.
+
+### DEC-016 - Save schema 2 and first-section verification
+
+- **Date:** 2026-11-19.
+- **Decision maker:** Assistant implementation choice.
+- **Decision:** Add accepted/completed quest, looted treasure, and completed
+  section ID collections in schema 2. Migrate schema-1 saves on read without
+  changing stats, position, boss completion, or enemy cooldowns. Validate IDs,
+  duplicates, and completion prerequisites; retain explicit startup/save errors
+  and last-known-good backup recovery.
+- **Compatibility/recovery:** The next successful save writes schema 2 using the
+  existing temporary-file/backup replacement. Old builds cannot read schema 2;
+  copy the save directory before downgrading. A pre-upgrade backup is not a
+  permanent rollback copy because later saves rotate the normal `.bak`.
+  No progress reset is performed.
+- **Verification:** Scene authoring and all 12 EditMode/11 PlayMode tests pass,
+  including healing/death/pause, migration/replay, and the authored quest/chest/
+  boss/gate flow across reload. Tests use single-scene isolation to avoid
+  duplicate objects from the Editor's open scene; preview rendering uses actual
+  Unity graphics. The progression integration test directly defeats the boss
+  and does not certify human combat balance.
+- **Android:** The updated IL2CPP/ARM64 development APK built successfully; its
+  manifest, native libraries, and debug signature were inspected. Artifact size,
+  hash, and run configuration are in [getting started](getting-started.md).
+  No Android device is connected. iOS/device/thermal/soak and licensed-CI checks
+  remain unverified; none is silently marked complete.
+
+### DEC-017 - Approved connected world and 20 location themes
+
+- **Date:** 2026-11-19.
+- **Decision maker:** Owner, accepting the proposed 20-location theme list.
+- **Decision:** Use one large, connected world. Begin in Mosswatch Hollow;
+  defeating each location's boss permanently unlocks the next, harder
+  location. The hero remains free to cross between unlocked locations and
+  revisit earlier regions. Persist unlocks across restarts.
+- **Content source:** Preserve the approved names, visual themes, and
+  progression order in the
+  [gameplay specification](gameplay-specification.md#approved-world-progression-and-location-themes),
+  from Mosswatch Hollow through The Eclipse Throne. Link to that list rather
+  than maintaining competing copies.
+- **Status and consequences:** Approved design direction only; Mosswatch is
+  the sole implemented location. Detailed geography, connecting paths, later
+  encounters, quest/reward content, and difficulty tuning remain future work.
+  The owner requested documentation, not implementation of the other 19
+  locations. Existing MVP scope proposals and device/performance/release gates
+  are unchanged.
+
+### DEC-018 - A complete first-map story with room to continue
+
+- **Date:** 2026-11-19.
+- **Decision maker:** Owner for the continuation requirement; assistant for the
+  proposed story treatment.
+- **Confirmed requirement:** Create a story for the approved map that can
+  continue after all 20 locations are finished, when the next map with new
+  locations unlocks.
+- **Draft, not approved canon:** [The Unbroken Road](story.md) proposes a
+  lantern-road network, Regent Veyr, a five-act arc across the approved location
+  sequence, a genuine liberation of the first map, and contact with survivors
+  beyond its final gate. The first map resolves its own conflict; later maps
+  can explore the larger mystery without undoing that victory.
+- **Boundaries:** Preserve the existing Mosswatch Warden quest/dialogue, heroic
+  tone, short mobile-friendly storytelling, permanent unlocks, and backtracking.
+  No new mechanics, collection requirements, scenes, dialogue assets, or save
+  changes are implemented. The next map's location count/themes and the larger
+  mystery's resolution remain undesigned.
+
+### DEC-019 - Per-map summoned quest mobs and weakness-based challenges
+
+- **Date:** 2026-11-19.
+- **Decision maker:** Owner.
+- **Clarification:** The original map-versus-location interpretation below and
+  the then-open count/summoning questions are superseded by DEC-020. The
+  distinctive mobs, discoverable weaknesses, and greater rewards still apply.
+- **Decision:** Each map has a quest-giver NPC who summons staged quest mobs.
+  Map 1 has one mob and Map 2 has two; a later stage becomes available only
+  after defeating the preceding mob. Each mob is distinctive and highly
+  resistant relative to expected hero strength, but has a discoverable weakness
+  that makes it beatable before the relevant boss. Each quest-mob defeat
+  provides a greater reward than an ordinary mob, not just a final-series reward.
+- **Source of truth:** The
+  [gameplay specification](gameplay-specification.md#location-quest-giver-and-summoned-quest-mobs)
+  records the requirements and deferred questions. Maps are multi-location
+  worlds; these quest encounters do not replace location-unlocking bosses.
+- **Scope/status:** Documentation only, with details to be specified later.
+  Do not invent resistance/reward values, particular weaknesses, later-map
+  counts, a summoning interaction, replay/claim rules, or an optional/mandatory
+  classification. NPC identity and the connection to the main story are open.
+  This extends the earlier quest scope without changing the existing Warden
+  implementation, approved boss gates, scenes, or saves.
+
+### DEC-020 - Per-location counts, confirmed summons, and defeat retries
+
+- **Date:** 2026-11-19.
+- **Decision maker:** Owner.
+- **Scope clarification:** When asked whether counts increase across the
+  20 locations or separate multi-location maps, the owner selected
+  "Across the 20 locations within each map." Correct DEC-019's earlier
+  interpretation: each location has its quest giver and location N has N
+  sequential quest mobs, from 1 in Mosswatch Hollow to 20 in The Eclipse Throne.
+- **Summoning:** The player must go to the quest giver and explicitly confirm
+  each summon. Defeating a stage unlocks the next, but never automatically
+  summons it. The same confirmation is required for retries.
+- **Failure:** A quest mob disappears after it kills the hero. It does not
+  automatically respawn; the player must request another summon of the
+  undefeated stage. Failure does not advance the sequence or undo completed
+  stages.
+- **Status:** Documentation only. Preserve the earlier weakness/large-reward
+  requirements. Detailed stats, rewards, replay/claim policy, re-summoned mob
+  state, and other encounter lifecycle edge cases remain open. No Unity
+  gameplay, scenes, or saves are changed.
+
+### DEC-021 - Required location difficulty and farming-time tooling
+
+- **Date:** 2026-11-19.
+- **Decision maker:** Owner.
+- **Decision:** A tool for calculating/testing each location's difficulty and
+  farming time to boss readiness must be part of development. Record it as a
+  required deliverable, not optional post-content cleanup.
+- **Pacing examples:** The owner suggested roughly 1 hour of farming/play in
+  the first location before defeating its boss, increasing to roughly 1-3
+  months of farming at the final location. These are illustrative targets;
+  exact durations, skill assumptions, daily play frequency, and the distinction
+  between calendar months and accumulated active play remain open. No hard
+  waiting gate or current tuning change is approved by these examples.
+- **Development implications:** Use authored rules/data and expected carried-over
+  hero progress; account for combat, rewards, cooldowns, daily limits, and
+  future weakness-based quest encounters. Expose scenario assumptions and
+  unreachable progression. Verify model predictions against game behavior;
+  calculated pacing is not evidence that the game is fun.
+- **Status/source:** Documentation only; the tool is not implemented.
+  Requirements are in the
+  [gameplay specification](gameplay-specification.md#required-difficulty-and-progression-pacing-tool),
+  validation expectations in the testing strategy, and implementation task
+  S-06 in the roadmap. Existing gameplay values, scenes, and saves are unchanged.
+
+### DEC-022 - Full free-to-play completion and optional paid acceleration
+
+- **Date:** 2026-11-19.
+- **Decision maker:** Owner.
+- **Decision:** The player must be able to complete the entire game free-to-play.
+  Future in-game purchases only speed up progression; they are not required to
+  defeat bosses, complete quests, or access locations/maps and the ending.
+- **Balancing consequence:** The required difficulty/pacing tool must establish
+  a no-purchase baseline. Evaluate DEC-021's illustrative progression durations
+  against that baseline; compare paid acceleration separately when defined.
+  A paid-only prerequisite or unreachable free progression violates this rule.
+- **Open details/status:** Products, prices, acceleration values/durations,
+  limits, and economy rules are not yet specified. This records direction only;
+  no purchase SDK, economy, backend, scenes, or saves are implemented or changed.
+  Existing security/privacy and authoritative purchase-verification gates remain.
+
+### DEC-023 - AI Act alignment as a release-review requirement
+
+- **Date:** 2026-11-19.
+- **Decision maker:** Owner.
+- **Requirement:** The game should align with applicable AI legislation; the
+  owner asked for the most important EU AI Act considerations.
+- **Recorded approach:** Keep AI-assisted development distinct from actual
+  in-game AI functionality; review intended use and provider/deployer roles,
+  literacy, applicable transparency duties, manipulation/vulnerability risks,
+  provenance, and related privacy/consumer/IP obligations before release.
+  Preliminary guidance and official sources are in
+  [AI-assisted development and provenance](ai-usage.md).
+- **Status:** Research/planning guidance, not a legal opinion, audit,
+  certification, or authorization to add AI features. Release-specific
+  applicability remains to be assessed with qualified legal advice.
+
 ## Open ideas and questions
 
 The current source of truth for unanswered gameplay and product questions is

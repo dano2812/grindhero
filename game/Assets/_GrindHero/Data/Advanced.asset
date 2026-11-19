@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8640b03a12f9f647a64940e94717b85, type: 3}
   m_Name: Advanced
   m_EditorClassIdentifier: GrindHero.Presentation::GrindHero.Presentation.Definitions.EnemyDefinition
+  visualPrefab: {fileID: 3908567475386738302, guid: 49c2d125f5dee13419fe8653d0d99fab, type: 3}
   stableId: enemy.advanced.graybox
   displayName: Advanced
   archetype: 2

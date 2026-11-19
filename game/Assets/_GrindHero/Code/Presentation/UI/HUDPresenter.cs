@@ -21,8 +21,8 @@ namespace GrindHero.Presentation.UI
         private const float RespawnCooldownTextWidth = 82f;
         private const float RespawnPipSize = 12f;
         private const float RespawnPipSpacing = 4f;
-        private const float HealthBannerWidth = 210f;
-        private const float HealthBannerHeight = 44f;
+        private const float HealthBannerWidth = 230f;
+        private const float HealthBannerHeight = 50f;
         private const float HealthBannerWorldOffset = 2.75f;
         private static readonly Color RemainingRespawnPipColor =
             new Color(0.98f, 0.72f, 0.24f, 1f);
@@ -63,11 +63,16 @@ namespace GrindHero.Presentation.UI
         private Text _bossText;
         private Text _messageText;
         private Text _helpText;
+        private Text _sectionTitle;
+        private Text _objectiveText;
+        private Image _messagePanel;
         private Image _pauseButtonImage;
         private Text _pauseButtonText;
         private RectTransform _pauseButtonRect;
         private Image _joystickRing;
         private Image _joystickHandle;
+        private Texture2D _joystickTexture;
+        private Sprite _joystickSprite;
         private ICombatSession _combatSession;
         private CombatWorld _combatWorld;
         private HeroActor _hero;
@@ -122,7 +127,13 @@ namespace GrindHero.Presentation.UI
             ApplySafeArea();
         }
 
-        public void ShowMessage(string message, Color color)
+        public void SetSectionObjective(string title, string objective)
+        {
+            if (_sectionTitle != null && _sectionTitle.text != title) _sectionTitle.text = title;
+            if (_objectiveText != null && _objectiveText.text != objective) _objectiveText.text = objective;
+        }
+
+        public void ShowMessage(string message, Color color, float durationSeconds = 3f)
         {
             if (_messageText == null)
             {
@@ -131,7 +142,7 @@ namespace GrindHero.Presentation.UI
 
             _messageText.text = message;
             _messageText.color = color;
-            _messageUntil = Time.unscaledTime + 3f;
+            _messageUntil = Time.unscaledTime + durationSeconds;
         }
 
         public void SetPaused(bool paused)
@@ -224,8 +235,8 @@ namespace GrindHero.Presentation.UI
             var armor = (_combatSession.HeadAxeArmor + _combatSession.TorsoAxeArmor)
                 .ToString("0.#", CultureInfo.InvariantCulture);
             _statsText.text =
-                $"HP {health} / {maximumHealth}    Axe {axeDamage}    Axe armor {armor}    " +
-                $"Dodge {_combatSession.DodgeChance:P0}    Block {_combatSession.BlockChance:P0}";
+                $"VITALITY   {health} / {maximumHealth}\n" +
+                $"AXE  {axeDamage}     ARMOR  {armor}     DODGE {_combatSession.DodgeChance:P0} / BLOCK {_combatSession.BlockChance:P0}";
 
             if (_hero != null && _hero.CurrentTarget != null && _hero.CurrentTarget.IsAlive)
             {
@@ -257,6 +268,7 @@ namespace GrindHero.Presentation.UI
             {
                 _messageText.enabled = Time.unscaledTime < _messageUntil;
             }
+            if (_messagePanel != null) _messagePanel.enabled = _messageText.enabled;
         }
 
         private void CreateCanvasIfNeeded()
@@ -301,9 +313,9 @@ namespace GrindHero.Presentation.UI
                 new Vector2(0f, 1f),
                 new Vector2(0f, 1f),
                 new Vector2(0f, 1f),
-                new Vector2(1180f, 90f),
-                new Vector2(28f, -24f),
-                32,
+                new Vector2(700f, 64f),
+                new Vector2(48f, -68f),
+                22,
                 TextAnchor.UpperLeft);
 
             _targetText = CreateText(
@@ -312,9 +324,9 @@ namespace GrindHero.Presentation.UI
                 new Vector2(0f, 1f),
                 new Vector2(0f, 1f),
                 new Vector2(0f, 1f),
-                new Vector2(700f, 60f),
-                new Vector2(28f, -94f),
-                29,
+                new Vector2(650f, 44f),
+                new Vector2(48f, -136f),
+                21,
                 TextAnchor.UpperLeft);
 
             _bossText = CreateText(
@@ -323,22 +335,46 @@ namespace GrindHero.Presentation.UI
                 new Vector2(1f, 1f),
                 new Vector2(1f, 1f),
                 new Vector2(1f, 1f),
-                new Vector2(690f, 64f),
-                new Vector2(-28f, -28f),
-                29,
+                new Vector2(650f, 42f),
+                new Vector2(-46f, -136f),
+                21,
                 TextAnchor.UpperRight);
 
+            _messagePanel = CreateImage("Story and feedback panel", _safeAreaRect);
+            _messagePanel.rectTransform.anchorMin = new Vector2(0.5f, 0f);
+            _messagePanel.rectTransform.anchorMax = new Vector2(0.5f, 0f);
+            _messagePanel.rectTransform.pivot = new Vector2(0.5f, 0f);
+            _messagePanel.rectTransform.sizeDelta = new Vector2(1160f, 140f);
+            _messagePanel.rectTransform.anchoredPosition = new Vector2(0f, 140f);
+            _messagePanel.color = new Color(0.035f, 0.075f, 0.09f, 0.94f);
+            _messagePanel.enabled = false;
             _messageText = CreateText(
                 "Combat feedback",
                 _safeAreaRect,
-                new Vector2(0.5f, 0.5f),
-                new Vector2(0.5f, 0.5f),
-                new Vector2(0.5f, 0.5f),
-                new Vector2(1120f, 130f),
-                Vector2.zero,
-                42,
+                new Vector2(0.5f, 0f),
+                new Vector2(0.5f, 0f),
+                new Vector2(0.5f, 0f),
+                new Vector2(1080f, 130f),
+                new Vector2(0f, 145f),
+                29,
                 TextAnchor.MiddleCenter);
             _messageText.enabled = false;
+            _messageText.horizontalOverflow = HorizontalWrapMode.Wrap;
+            _sectionTitle = CreateText("Section title", _safeAreaRect,
+                new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f),
+                new Vector2(650f, 46f), new Vector2(48f, -26f), 30, TextAnchor.UpperLeft);
+            _sectionTitle.color = new Color(1f, 0.82f, 0.46f);
+            _objectiveText = CreateText("Main story objective", _safeAreaRect,
+                new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f),
+                new Vector2(650f, 70f), new Vector2(-46f, -61f), 25, TextAnchor.UpperRight);
+            _objectiveText.horizontalOverflow = HorizontalWrapMode.Wrap;
+            var questHeading = CreateText("Quest heading", _safeAreaRect,
+                new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f),
+                new Vector2(650f, 36f), new Vector2(-46f, -26f), 21, TextAnchor.UpperRight);
+            questHeading.text = "CHAPTER 01   /   THE SILENT WATCH";
+            questHeading.color = new Color(1f, 0.82f, 0.46f);
+            CreateHeaderPlate("Hero plate", new Vector2(0f, 1f), new Vector2(24f, -16f), new Vector2(750f, 160f));
+            CreateHeaderPlate("Quest plate", new Vector2(1f, 1f), new Vector2(-24f, -16f), new Vector2(710f, 160f));
 
             _helpText = CreateText(
                 "Controls",
@@ -350,7 +386,8 @@ namespace GrindHero.Presentation.UI
                 new Vector2(0f, 34f),
                 26,
                 TextAnchor.MiddleCenter);
-            _helpText.text = "Drag to move - auto-attack in range";
+            _helpText.text = "DRAG TO MOVE   /   AUTO ATTACK   /   EXPLORE THE GROVE";
+            _helpText.color = new Color(0.88f, 0.91f, 0.78f);
 
             _pauseButtonImage = CreateImage("Pause button", _safeAreaRect);
             _pauseButtonRect = _pauseButtonImage.rectTransform;
@@ -373,13 +410,30 @@ namespace GrindHero.Presentation.UI
             _pauseButtonText.text = "II";
 
             _joystickRing = CreateImage("Dynamic joystick base", _canvasRect);
+            _joystickTexture = new Texture2D(64, 64, TextureFormat.RGBA32, false);
+            var pixels = new Color[64 * 64];
+            for (var y = 0; y < 64; y++)
+                for (var x = 0; x < 64; x++)
+                    pixels[y * 64 + x] = new Color(1f, 1f, 1f,
+                        Mathf.Clamp01(31.5f - Vector2.Distance(new Vector2(x, y), new Vector2(31.5f, 31.5f))));
+            _joystickTexture.SetPixels(pixels);
+            _joystickTexture.Apply(false, true);
+            _joystickSprite = Sprite.Create(_joystickTexture, new Rect(0f, 0f, 64f, 64f), Vector2.one * 0.5f);
+            _joystickRing.sprite = _joystickSprite;
             _joystickRing.rectTransform.sizeDelta = new Vector2(220f, 220f);
             _joystickRing.color = new Color(0.12f, 0.14f, 0.18f, 0.45f);
             _joystickHandle = CreateImage("Dynamic joystick handle", _canvasRect);
+            _joystickHandle.sprite = _joystickSprite;
             _joystickHandle.rectTransform.sizeDelta = new Vector2(86f, 86f);
-            _joystickHandle.color = new Color(0.85f, 0.9f, 0.96f, 0.72f);
+            _joystickHandle.color = new Color(0.98f, 0.8f, 0.43f, 0.85f);
             _joystickRing.transform.SetAsLastSibling();
             _joystickHandle.transform.SetAsLastSibling();
+        }
+
+        private void OnDestroy()
+        {
+            if (_joystickSprite != null) Destroy(_joystickSprite);
+            if (_joystickTexture != null) Destroy(_joystickTexture);
         }
 
         private void UpdateRespawnIndicators()
@@ -502,7 +556,7 @@ namespace GrindHero.Presentation.UI
                         enemy.DisplayName,
                         enemy.CurrentHealth,
                         enemy.MaximumHealth,
-                        enemy.transform.position + Vector3.up * HealthBannerWorldOffset,
+                        enemy.transform.position + Vector3.up * enemy.HealthBannerHeight,
                         frame);
                 }
             }
@@ -719,9 +773,9 @@ namespace GrindHero.Presentation.UI
                 new Vector2(0f, 1f),
                 new Vector2(1f, 1f),
                 new Vector2(0.5f, 1f),
-                new Vector2(-12f, 22f),
+                new Vector2(-12f, 28f),
                 new Vector2(0f, -2f),
-                16,
+                20,
                 TextAnchor.MiddleCenter);
 
             var healthTrack = CreateImage("Health bar track", root);
@@ -760,6 +814,24 @@ namespace GrindHero.Presentation.UI
                 "{0:00}:{1:00}",
                 totalSeconds / 60,
                 totalSeconds % 60);
+        }
+
+        private void CreateHeaderPlate(string name, Vector2 anchor, Vector2 position, Vector2 size)
+        {
+            var image = CreateImage(name, _safeAreaRect);
+            image.rectTransform.anchorMin = anchor;
+            image.rectTransform.anchorMax = anchor;
+            image.rectTransform.pivot = anchor;
+            image.rectTransform.sizeDelta = size;
+            image.rectTransform.anchoredPosition = position;
+            image.color = new Color(0.035f, 0.075f, 0.09f, 0.9f);
+            image.transform.SetAsFirstSibling();
+            var line = CreateImage("Gilded edge", image.transform);
+            line.rectTransform.anchorMin = new Vector2(0f, 1f);
+            line.rectTransform.anchorMax = new Vector2(1f, 1f);
+            line.rectTransform.sizeDelta = new Vector2(0f, 3f);
+            line.rectTransform.anchoredPosition = Vector2.zero;
+            line.color = new Color(0.91f, 0.62f, 0.28f, 1f);
         }
 
         private void HandlePauseInput()

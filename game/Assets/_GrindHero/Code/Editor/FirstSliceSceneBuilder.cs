@@ -47,6 +47,7 @@ namespace GrindHero.EditorTools
             AssetDatabase.Refresh();
 
             var materials = CreateMaterials();
+            FirstSectionArt.Prepare();
             var content = CreateContent();
 
             BuildScene(MainScenePath, content, materials, string.Empty);
@@ -179,6 +180,8 @@ namespace GrindHero.EditorTools
                     asset.baseAxeDamage = 15f;
                     asset.axeDamagePerPoint = 1f;
                     asset.movementSpeed = 4.5f;
+                    asset.healingPerSecond = 2f;
+                    asset.heroVisualPrefab = FirstSectionArt.CreateCharacter("Vanguard", "Blue", 1f, true);
                     asset.startingDodgeChance = 0f;
                     asset.startingBlockChance = 0f;
                     asset.blockDamageMultiplier = 0.8f;
@@ -192,7 +195,18 @@ namespace GrindHero.EditorTools
                     asset.saveIntervalSeconds = 5f;
                 });
 
-            return new FirstSliceContent(tuning, basicHealth, basicAttack, advanced, boss);
+            basicHealth.visualPrefab = FirstSectionArt.CreateCharacter("Mossbound", "Moss", 0.95f);
+            basicAttack.visualPrefab = FirstSectionArt.CreateCharacter("Ironbound", "Rust", 0.95f);
+            advanced.visualPrefab = FirstSectionArt.CreateCharacter("RuinKeeper", "Amethyst", 1.12f);
+            boss.visualPrefab = FirstSectionArt.CreateCharacter("HollowGuardian", "Stone", 1.3f);
+            boss.displayName = "Hollow Guardian";
+            EditorUtility.SetDirty(basicHealth);
+            EditorUtility.SetDirty(basicAttack);
+            EditorUtility.SetDirty(advanced);
+            EditorUtility.SetDirty(boss);
+            var section = CreateAsset(DataRoot + "/Mosswatch.asset",
+                () => ScriptableObject.CreateInstance<FirstSectionDefinition>(), asset => { });
+            return new FirstSliceContent(tuning, basicHealth, basicAttack, advanced, boss, section);
         }
 
         private static EnemyDefinition CreateEnemyDefinition(
@@ -262,12 +276,17 @@ namespace GrindHero.EditorTools
             string saveDirectoryOverride)
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
-            RenderSettings.ambientLight = new Color(0.48f, 0.5f, 0.55f);
-            RenderSettings.fog = false;
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
+            RenderSettings.ambientSkyColor = new Color(0.63f, 0.75f, 0.77f);
+            RenderSettings.ambientEquatorColor = new Color(0.43f, 0.55f, 0.49f);
+            RenderSettings.ambientGroundColor = new Color(0.24f, 0.31f, 0.30f);
+            RenderSettings.fog = true;
+            RenderSettings.fogMode = FogMode.Linear;
+            RenderSettings.fogColor = new Color(0.20f, 0.36f, 0.38f);
+            RenderSettings.fogStartDistance = 36f;
+            RenderSettings.fogEndDistance = 80f;
 
             CreateDirectionalLight();
-            CreateArena(materials);
 
             var spawn = new GameObject("Hero Spawn");
             spawn.transform.position = new Vector3(-13f, 0f, 0f);
@@ -284,10 +303,12 @@ namespace GrindHero.EditorTools
             cameraObject.tag = "MainCamera";
             var camera = cameraObject.AddComponent<Camera>();
             camera.orthographic = true;
-            camera.orthographicSize = 14f;
+            camera.orthographicSize = 8f;
             camera.nearClipPlane = 0.1f;
             camera.farClipPlane = 100f;
-            camera.backgroundColor = new Color(0.23f, 0.33f, 0.39f);
+            camera.backgroundColor = new Color(0.16f, 0.30f, 0.34f);
+            camera.allowHDR = false;
+            camera.allowMSAA = true;
             cameraObject.AddComponent<AudioListener>();
             var cameraFollow = cameraObject.AddComponent<CameraFollow>();
 
@@ -299,7 +320,9 @@ namespace GrindHero.EditorTools
 
             var gateObject = new GameObject("Section Exit");
             gateObject.transform.position = new Vector3(15.5f, 0f, 0f);
+            gateObject.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
             gateObject.AddComponent<ExitGate>();
+            var adventure = FirstSectionArt.BuildEnvironment(gateObject.transform, content.Section);
 
             var spawnPoints = new[]
             {
@@ -323,6 +346,9 @@ namespace GrindHero.EditorTools
                 gateObject.GetComponent<ExitGate>(),
                 spawnPoints,
                 saveDirectoryOverride);
+            var sectionSerialized = new SerializedObject(bootstrapper);
+            sectionSerialized.FindProperty("sectionAdventure").objectReferenceValue = adventure;
+            sectionSerialized.ApplyModifiedPropertiesWithoutUndo();
 
             MarkSceneObjectsStatic(spawn, heroObject, gateObject);
             EditorSceneManager.MarkSceneDirty(scene);
@@ -516,13 +542,15 @@ namespace GrindHero.EditorTools
                 EnemyDefinition basicHealth,
                 EnemyDefinition basicAttack,
                 EnemyDefinition advanced,
-                EnemyDefinition boss)
+                EnemyDefinition boss,
+                FirstSectionDefinition section)
             {
                 Tuning = tuning;
                 BasicHealth = basicHealth;
                 BasicAttack = basicAttack;
                 Advanced = advanced;
                 Boss = boss;
+                Section = section;
             }
 
             public FirstSliceTuning Tuning { get; }
@@ -530,6 +558,7 @@ namespace GrindHero.EditorTools
             public EnemyDefinition BasicAttack { get; }
             public EnemyDefinition Advanced { get; }
             public EnemyDefinition Boss { get; }
+            public FirstSectionDefinition Section { get; }
         }
 
         private sealed class FirstSliceMaterials

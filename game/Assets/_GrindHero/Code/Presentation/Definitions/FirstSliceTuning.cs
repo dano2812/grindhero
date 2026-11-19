@@ -12,6 +12,8 @@ namespace GrindHero.Presentation.Definitions
         [Min(0f)] public float baseAxeDamage = 15f;
         [Min(0f)] public float axeDamagePerPoint = 1f;
         [Min(0f)] public float movementSpeed = 4.5f;
+        [Min(0f)] public float healingPerSecond = 2f;
+        public GameObject heroVisualPrefab;
         [Range(0f, 1f)] public float startingDodgeChance;
         [Range(0f, 1f)] public float startingBlockChance;
         [Range(0f, 1f)] public float blockDamageMultiplier = 0.8f;
@@ -40,6 +42,8 @@ namespace GrindHero.Presentation.Definitions
                 !IsFinite(axeDamagePerPoint) ||
                 axeDamagePerPoint < 0f ||
                 !IsFinite(movementSpeed) ||
+                !IsFinite(healingPerSecond) ||
+                healingPerSecond < 0f ||
                 movementSpeed <= 0f)
             {
                 return "Hero health, damage, and movement tuning must be finite and valid.";
