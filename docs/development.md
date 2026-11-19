@@ -23,7 +23,18 @@ A larger feature plan should live in the issue or an explicitly requested design
 document and contain: outcome, current behavior, options/decision, affected
 assemblies/content/saves, incremental tasks with real prerequisites, risks,
 validation, rollout, and rollback. Do not accumulate transient planning files in
-the repository. Record lasting architectural decisions as ADRs.
+the repository.
+
+Record every development decision in the [development decision log](decision-log.md),
+whether made by the owner or selected by the assistant. This includes gameplay,
+design/UX, tuning, implementation, architecture, testing, tooling, data, and
+workflow choices; do not leave a decision only in chat or code. Identify the
+decision maker, status, rationale, affected files or rules, and validation;
+label unverified assistant choices as provisional. Append a superseding entry
+instead of rewriting history. Keep unresolved ideas in the gameplay
+specification's open-questions section. Durable architecture choices must also
+have an ADR; the log is the cross-cutting history, not a replacement for
+detailed specs.
 
 ## C# and Unity rules
 

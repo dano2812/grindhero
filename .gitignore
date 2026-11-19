@@ -8,6 +8,7 @@
 /game/[Rr]ecordings/
 /game/[Bb]uild/
 /game/[Bb]uilds/
+/game/.utmp/
 /game/.vs/
 /game/.idea/
 /game/*.csproj

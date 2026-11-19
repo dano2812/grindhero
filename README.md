@@ -4,11 +4,12 @@ A mobile, fixed-camera 3D action RPG for iOS and Android, built with Unity and C
 The player fights enemies, gains stats and loot, completes quests, discovers
 secrets, and defeats bosses to unlock connected map sections.
 
-**Status: first-slice graybox implemented and Editor-tested; not yet validated
-on mobile devices.** The Unity project is in `game/`, pinned to Editor
-`6000.6.5f1` and URP `17.6.0`. Its generated scene passes 9 EditMode tests and
-1 PlayMode smoke test, and the repository readiness precheck passes. Android
-and iOS player builds, physical-device testing, and licensed CI remain open.
+**Status: first-slice graybox Editor-tested and Android smoke APK built; not yet
+validated on mobile devices.** The Unity project is in `game/`, pinned to Editor
+`6000.6.5f1` and URP `17.6.0`. It passes 9 EditMode tests and 8 PlayMode
+tests, and the repository readiness precheck passes. A local debug-signed
+IL2CPP/ARM64 APK is available; see [Android smoke builds](docs/getting-started.md#local-android-smoke-apk).
+iOS builds, physical-device testing, and licensed CI remain open.
 No backend or purchasing SDK is installed.
 
 ## Start here
@@ -31,7 +32,9 @@ No backend or purchasing SDK is installed.
 
 Repository conventions are in [CONTRIBUTING.md](CONTRIBUTING.md);
 release policy is in [versioning and delivery](docs/delivery.md).
-Architecture decisions are recorded in [ADRs](docs/adr/README.md).
+All material owner and assistant decisions are tracked in the
+[development decision log](docs/decision-log.md); durable architecture choices
+are maintained as [ADRs](docs/adr/README.md).
 
 ## Checks available now
 
@@ -51,8 +54,8 @@ use `pwsh` and omit `-ExecutionPolicy Bypass`. The Unity readiness check validat
 project files, package pins, metadata, assemblies, test presence, and the build
 scene; it does not compile or run the game. Editor test commands and current
 results are in [getting started](docs/getting-started.md). Those tests cover
-rules, persistence, and scene boot/pause, not full device behavior or final
-combat balance.
+rules, persistence, scene boot/pause, health banners, recovery, and respawn
+indicators, not full device behavior or final combat balance.
 
 ## AI-assisted development
 

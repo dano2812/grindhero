@@ -21,14 +21,14 @@ associated repository work can still be done here.
 1. **You — Review the open decisions in [the gameplay specification](gameplay-specification.md).**
    The first-slice behavior is recorded and implemented as a prototype. Confirm
    the starting armor, reward permanence/amounts, respawn-limit scope and reset,
-   Advanced-enemy reward, boss chase behavior, and combat balance. **I can:**
+   Advanced-enemy reward, boss reward repeatability, and combat balance. **I can:**
    explain trade-offs and update code/tests/data. **You decide:** game feel,
    scope, and final balance.
 2. **Together — Confirm licensed builds and test devices.** Unity Hub and
    Unity `6000.6.5f1` Update are installed in this session. The owner selected
    this Update release to proceed after the `6000.3.26f1` LTS candidate failed
-   to compile in its bundled URP. Android/iOS module availability and license
-   eligibility still need verification through actual platform builds.
+   to compile in its bundled URP. The Android module/toolchain produced a local
+   IL2CPP/ARM64 development APK on 2026-11-19. iOS build access remains unverified.
    Identify the actual iOS and Android devices available for testing. iOS builds
    require macOS and Xcode for local archive/signing; if your main development
    computer is Windows, arrange a Mac or approved Mac build host. **I can:**
@@ -36,9 +36,10 @@ associated repository work can still be done here.
    Unity terms and confirm license eligibility and test devices.
 3. **I can — Bootstrap the Universal 3D project at `game` (completed).** The
    project uses Editor `6000.6.5f1`, URP `17.6.0`, and a resolved package lock.
-   The first-slice scenes, data assets, and assemblies have been generated;
-   **9 EditMode and 1 PlayMode test pass** in the Editor. **You must:** accept
-   applicable Unity terms and verify platform builds on physical devices.
+   The original foundation baseline passed 9 EditMode tests and 1 PlayMode
+   smoke test. The current slice passes 9 EditMode and 8 PlayMode tests,
+   including recovery and HUD regressions. **You must:** accept applicable
+   Unity terms and verify platform builds on physical devices.
 4. **Together — Review the first-slice interaction choices.** Landscape,
    one-finger virtual-joystick movement, a following fixed-angle camera, and
    automatic nearby targeting are in the graybox. **I can:** refine the
@@ -74,10 +75,14 @@ associated repository work can still be done here.
    prepare/review code and secure workflows. **You must:** hold the accounts,
    credentials, legal approvals, and final publication authority.
 
-**Current immediate action:** review and playtest the generated graybox, then
-confirm the open decisions in the gameplay specification. Keep the current
-enemy damage, reward amounts, starting armor, daily-cap interpretation, and boss
-behavior provisional until you approve them after playtesting.
+**Current immediate action:** install the local Android smoke APK on a physical
+ARM64 device and exercise the checklist in
+[getting started](getting-started.md#local-android-smoke-apk). On 2026-11-19 the
+owner accepted the current verification/playtest state "for now" and asked to
+continue. That is provisional acceptance, not physical-device evidence.
+Always-active hero healing and an ordinary-mob-style boss with higher HP/damage
+are recorded; hero healing is not yet implemented. Numeric tuning, unspecified
+stat sources, and unresolved worksheet details remain provisional.
 
 ## Milestones and exit gates
 
@@ -94,11 +99,14 @@ behavior provisional until you approve them after playtesting.
 Do not implement future milestones merely to fill folders. No multiplayer or live
 operations milestone is implied.
 
-**Current evidence:** Editor scene generation and the local EditMode/PlayMode
-test suites pass. The repository readiness precheck also passes; it verifies
-project structure and metadata, not compilation, tests, licensing, or platform
-builds. No Android/iOS player build, physical-device test, licensed CI run, or
-performance soak has been completed.
+**Current evidence (2026-11-19):** Repository/readiness checks, all 9 EditMode
+tests, and all 8 PlayMode tests pass. A local IL2CPP/ARM64 Android development
+APK built with zero reported build warnings, and its manifest/native libraries
+and signature were verified. The initial license failure was resolved by the
+owner; the non-ASCII Windows path required ASCII project and Gradle-cache paths.
+No Android device was connected. Physical installation, touch/graphics,
+suspend/resume, performance soak, iOS player build, and licensed CI remain open.
+M1 is not complete. The readiness precheck itself does not compile or run Unity.
 
 ## Dependency-ready task backlog
 
@@ -111,7 +119,7 @@ performance soak has been completed.
 | B-04 | Produce Android and iOS smoke builds | B-02, B-03 | Both physical installs; pause/safe-area/input evidence; pinned toolchains |
 | B-05 | Enable trusted engine CI/protection | B-02 | Licensed clean tests pass; fork trust/approval documented; required checks configured |
 | S-01 | Hero movement, fixed camera, graybox section | B-03, B-04 | Touch movement and occlusion readable on baseline devices |
-| S-02 | Combat rules and enemy lifecycle | B-02, S-01 | Health/damage/death, 1-second enemy attack cycles, 5-second chase/return with 10%-of-max-HP-per-second healing and player-hit interruption/reset, Basic HP/Attack variants, Advanced enemy, deterministic rewards, respawn and pause tests |
+| S-02 | Combat rules and enemy lifecycle | B-02, S-01 | Health/damage/death, 3-second hero respawn, lethal-attacker retreat/attack lock, 1-second enemy attack cycles, all enemy types including the boss chase for 5 seconds then return with 10%-of-max-HP-per-second healing until full (at spawn if necessary) and player-hit interruption/reset, projected hero/mob HP banners, Basic HP/Attack variants, Advanced enemy, deterministic rewards, spawn-point respawn markers with cooldown and remaining-count visuals, respawn and pause tests |
 | S-03 | Boss progression and locked exit | S-02 | Boss completion unlocks exactly once; interrupted/replayed completion tested |
 | S-04 | Minimal save snapshot and recovery | S-03 | Restart retains unlock; corrupt/interrupted writes recover explicitly |
 | S-05 | Slice performance/fun review | S-04 | 15-minute device soak; approved numeric budgets and combat direction |
@@ -148,5 +156,9 @@ fixtures, physical-device suspend/resume. Evidence belongs in the PR.
 Estimate only the next milestone after its decisions are resolved. Engine
 learning, store enrollment, iOS access, and CI licensing are real prerequisites,
 not hidden "setup" time. Use short spikes when uncertainty is high.
-Record accepted design changes in ADRs; keep product choices in the game brief
-and task. Revisit MVP scope based on the slice instead of scaling unproven combat.
+Record material owner and assistant decisions in the
+[development decision log](decision-log.md); use ADRs for durable architectural
+choices and keep detailed product rules in the game brief/specification. Leave
+unresolved choices open rather than presenting implementation assumptions as
+approved. Revisit MVP scope based on the slice instead of scaling unproven
+combat.

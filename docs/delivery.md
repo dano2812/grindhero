@@ -36,8 +36,12 @@ an empty "release" for this documentation foundation.
 - Actions are pinned to immutable commits; Dependabot proposes reviewed updates.
   The GameCI CLI is also explicitly pinned and needs deliberate updates; its
   Unity container must be verified and digest-pinned during M1 toolchain setup.
-- No signing, mobile build, distribution, release, backend, or store upload
-  workflow exists yet. Their gates below must be implemented and exercised.
+- A local Editor-only Android smoke-build action produces a debug-signed
+  IL2CPP/ARM64 development APK; its command and evidence are in
+  [getting started](getting-started.md#local-android-smoke-apk). It is not a
+  distribution workflow or proof of device compatibility.
+- No release-signing, mobile-build CI, distribution, release, backend, or store
+  upload workflow exists yet. Their gates below must be implemented and exercised.
 
 Configure `unity-ci` environment restrictions/reviewers and Unity license secrets
 before dispatch. The supplied workflow uses a GameCI-supported license file plus

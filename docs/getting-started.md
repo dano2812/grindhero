@@ -187,6 +187,78 @@ results for a nonzero test count; a successful process with no discovered tests
 does not establish coverage. Rendering-dependent tests require a graphics-capable
 runner rather than treating headless tests as visual evidence.
 
+## Local Android smoke APK
+
+Close the Editor before running a batch build against this project. The installed
+Editor needs Android Build Support with its SDK/NDK tools and OpenJDK, and an
+active eligible Unity license. No store account or release signing key is needed.
+
+The Editor command `GrindHero.EditorTools.AndroidSmokeBuild.Build` builds only
+the first-slice scene as an IL2CPP/ARM64 development APK using default Android
+debug signing. It temporarily uses `com.grindhero.smoke`, not an approved store
+identifier, and restores the identifier, scripting backend, architecture, and
+APK/export settings afterward. It does not regenerate scenes or reset tuning.
+The same action is available under **GrindHero > Build Android Smoke APK** after
+switching the active Build Profile to Android.
+
+Android tooling rejects non-ASCII project paths on Windows. The commands below
+use a temporary drive alias to this same worktree, not a second checkout; choose
+another unused drive letter if `R:` is occupied. Gradle's cache must also have
+an ASCII path: a project alias alone still leaves native Prefab/CMake commands
+using the non-ASCII Windows user directory. The environment change below is
+process-local and restored afterward. From the repository root:
+
+```powershell
+$Unity = 'C:\Program Files\Unity\Hub\Editor\6000.6.5f1\Editor\Unity.exe'
+if (Test-Path 'R:\') { throw 'R: is already in use.' }
+New-Item -ItemType Directory -Force .\.artifacts | Out-Null
+subst.exe R: $PWD.Path
+if ($LASTEXITCODE -ne 0) { throw 'Could not create the ASCII drive alias.' }
+$originalGradleHome = $env:GRADLE_USER_HOME
+try {
+    $env:GRADLE_USER_HOME = 'R:\.artifacts\gradle-home'
+    $build = Start-Process -FilePath $Unity -ArgumentList @(
+        '-batchmode', '-quit', '-projectPath', 'R:\game',
+        '-buildTarget', 'Android',
+        '-executeMethod', 'GrindHero.EditorTools.AndroidSmokeBuild.Build',
+        '-logFile', 'R:\.artifacts\android-smoke.log'
+    ) -PassThru -Wait
+    if ($build.ExitCode -ne 0) { throw 'Build failed; inspect .artifacts\android-smoke.log.' }
+    Get-Item .\.artifacts\android\GrindHero-smoke.apk
+} finally {
+    $env:GRADLE_USER_HOME = $originalGradleHome
+    subst.exe R: /d
+}
+```
+
+The APK and log are local ignored artifacts, not a release or proof of device
+compatibility. On a USB-debugging-authorized ARM64 Android device, use the
+installed SDK's `adb.exe` to list devices and install the APK:
+
+```powershell
+$Adb = 'C:\Program Files\Unity\Hub\Editor\6000.6.5f1\Editor\Data\PlaybackEngines\AndroidPlayer\SDK\platform-tools\adb.exe'
+& $Adb devices
+& $Adb -s '<device-serial>' install -r .\.artifacts\android\GrindHero-smoke.apk
+if ($LASTEXITCODE -ne 0) { throw 'APK installation failed.' }
+```
+
+Launch the installed app and check touch movement/targeting, HP banners, enemy
+recovery, three-second hero respawn, mob cooldown markers, boss exit unlock,
+pause/background/resume, and save/relaunch. Record device model/OS and actual
+results; do not infer them from an Editor run. A 15-minute physical-device
+performance soak and an iOS build/install remain separate gates. Windows alone
+cannot produce a signed, device-installable iOS build.
+
+**Evidence (2026-11-19):** The build action succeeded with zero reported build
+warnings after the ASCII project/cache fixes. The APK is 39,948,059 bytes
+(about 38.1 MiB); its manifest identifies `com.grindhero.smoke`, version
+`0.1.0`/code `1`, and ARM64 native code. APK signature verification passed, and
+the package contains `libil2cpp.so`. SHA-256:
+`6DE6447A7BB9A7CD7A497A67491EAE442EB788F1FE42462E7F879FC0EAEF1732`.
+These facts describe this local artifact, not a reproducible binary hash
+guarantee. No Android device was connected; installation, graphics, touch,
+suspend/resume, and performance on hardware remain unverified.
+
 ## Sources
 
 - [Download Unity Hub](https://unity.com/download)

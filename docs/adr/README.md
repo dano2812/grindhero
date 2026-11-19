@@ -11,3 +11,8 @@ Current decisions:
 For a new record use: title, date/status, context, decision, alternatives,
 consequences, validation, and revisit trigger. A proposed technology is not
 permission to install it.
+
+The [development decision log](../decision-log.md) records the provenance and
+history of material product, gameplay, UX, and implementation choices. Add an
+ADR as well when a decision establishes or changes a durable architecture,
+security, persistence, or trust boundary.
