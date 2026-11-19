@@ -14,7 +14,8 @@ namespace GrindHero.Presentation
             Idle,
             Chasing,
             Engaged,
-            Returning
+            Returning,
+            ReturningAfterPlayerKill
         }
 
         private readonly List<Material> _ownedMaterials = new List<Material>();
@@ -30,6 +31,7 @@ namespace GrindHero.Presentation
         private float _nextAttackStartTime;
         private float _windupRemaining;
         private float _chaseRemaining;
+        private float _postKillRetreatRemaining;
         private bool _attackInProgress;
         private float _flashRemaining;
 
@@ -68,6 +70,7 @@ namespace GrindHero.Presentation
             IsAlive = true;
             _state = BehaviorState.Idle;
             _nextAttackStartTime = Time.time;
+            _postKillRetreatRemaining = 0f;
             _baseColor = definition.grayboxColor;
             CreateGrayboxModel();
             _combatWorld.Register(this);
@@ -86,8 +89,10 @@ namespace GrindHero.Presentation
 
             var distanceToHero = HorizontalDistance(transform.position, _hero.position);
             if (_state == BehaviorState.Chasing || _state == BehaviorState.Returning ||
+                _state == BehaviorState.ReturningAfterPlayerKill ||
                 _state == BehaviorState.Idle)
             {
+                _postKillRetreatRemaining = 0f;
                 _chaseRemaining = _definition.chaseTimeoutSeconds;
                 _state = distanceToHero <= _definition.attackRange
                     ? BehaviorState.Engaged
@@ -121,7 +126,7 @@ namespace GrindHero.Presentation
             switch (_state)
             {
                 case BehaviorState.Idle:
-                    UpdateIdle(distanceToHero);
+                    UpdateIdle(distanceToHero, deltaTime);
                     break;
                 case BehaviorState.Chasing:
                     UpdateChasing(distanceToHero, deltaTime);
@@ -132,6 +137,9 @@ namespace GrindHero.Presentation
                 case BehaviorState.Returning:
                     UpdateReturning(deltaTime);
                     break;
+                case BehaviorState.ReturningAfterPlayerKill:
+                    UpdatePostKillRetreat(deltaTime);
+                    break;
             }
 
             if (_state != BehaviorState.Engaged && _attackInProgress)
@@ -140,10 +148,11 @@ namespace GrindHero.Presentation
             }
         }
 
-        private void UpdateIdle(float distanceToHero)
+        private void UpdateIdle(float distanceToHero, float deltaTime)
         {
-            if (distanceToHero > _definition.aggroRange)
+            if (distanceToHero > _definition.FocusRange)
             {
+                HealTowardMaximumHealth(deltaTime);
                 return;
             }
 
@@ -191,24 +200,75 @@ namespace GrindHero.Presentation
 
         private void UpdateReturning(float deltaTime)
         {
+            if (MoveTowardSpawnAndHeal(deltaTime))
+            {
+                _state = BehaviorState.Idle;
+                SetBodyColor(_baseColor);
+            }
+        }
+
+        private void UpdatePostKillRetreat(float deltaTime)
+        {
+            var reachedSpawn = MoveTowardSpawnAndHeal(deltaTime);
+            _postKillRetreatRemaining -= deltaTime;
+            if (_postKillRetreatRemaining > 0f)
+            {
+                return;
+            }
+
+            var distanceToHero = HorizontalDistance(transform.position, _hero.position);
+            if (distanceToHero <= _definition.attackRange)
+            {
+                _state = BehaviorState.Engaged;
+                return;
+            }
+
+            if (distanceToHero <= _definition.FocusRange)
+            {
+                BeginChase();
+                return;
+            }
+
+            _state = reachedSpawn ? BehaviorState.Idle : BehaviorState.Returning;
+        }
+
+        private bool MoveTowardSpawnAndHeal(float deltaTime)
+        {
             MoveToward(_spawnTransform.position, deltaTime);
+            HealTowardMaximumHealth(deltaTime);
+
+            if (HorizontalDistance(transform.position, _spawnTransform.position) > 0.08f)
+            {
+                return false;
+            }
+
+            transform.position = _spawnTransform.position;
+            return true;
+        }
+
+        private void HealTowardMaximumHealth(float deltaTime)
+        {
+            if (!_definition.returnAndHeal)
+            {
+                return;
+            }
+
             CurrentHealth = Mathf.Min(
                 _definition.maximumHealth,
                 CurrentHealth +
                 (_definition.maximumHealth *
                  _definition.returnHealFractionPerSecond *
                  deltaTime));
-
-            if (HorizontalDistance(transform.position, _spawnTransform.position) <= 0.08f)
-            {
-                transform.position = _spawnTransform.position;
-                _state = BehaviorState.Idle;
-                SetBodyColor(_baseColor);
-            }
         }
 
         private void UpdateAttack(float deltaTime)
         {
+            if (_combatSession.IsHeroRespawning)
+            {
+                CancelAttackTelegraph();
+                return;
+            }
+
             if (_attackInProgress)
             {
                 _windupRemaining -= deltaTime;
@@ -219,9 +279,13 @@ namespace GrindHero.Presentation
 
                     if (HorizontalDistance(transform.position, _hero.position) <= _definition.attackRange)
                     {
-                        _combatSession.ReceiveHeroDamage(
+                        var defeatedHero = _combatSession.ReceiveHeroDamage(
                             _definition.attackDamage,
                             _definition.attackDamageType);
+                        if (defeatedHero)
+                        {
+                            BeginPostKillRetreat();
+                        }
                     }
                 }
             }
@@ -240,6 +304,13 @@ namespace GrindHero.Presentation
             {
                 UpdateAttack(0f);
             }
+        }
+
+        private void BeginPostKillRetreat()
+        {
+            CancelAttackTelegraph();
+            _state = BehaviorState.ReturningAfterPlayerKill;
+            _postKillRetreatRemaining = _combatSession.EnemyPostKillRetreatSeconds;
         }
 
         private void BeginChase()

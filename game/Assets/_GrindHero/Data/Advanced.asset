@@ -21,7 +21,6 @@ MonoBehaviour:
   attackCycleSeconds: 1
   windupSeconds: 0.65
   attackRange: 2.25
-  aggroRange: 9
   movementSpeed: 3.4
   chaseTimeoutSeconds: 5
   returnHealFractionPerSecond: 0.1

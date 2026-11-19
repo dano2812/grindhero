@@ -13,9 +13,11 @@ namespace GrindHero.Application.Combat
         float DodgeChance { get; }
         float BlockChance { get; }
         float BlockDamageMultiplier { get; }
+        bool IsHeroRespawning { get; }
+        float EnemyPostKillRetreatSeconds { get; }
         bool BossDefeated { get; }
 
-        void ReceiveHeroDamage(float rawDamage, DamageType damageType);
+        bool ReceiveHeroDamage(float rawDamage, DamageType damageType);
         void RecordHeroPosition(float x, float y, float z);
         void HandleEnemyDefeated(EnemyDefeatRecord defeat);
         void TryRespawnEnemy(string spawnId);

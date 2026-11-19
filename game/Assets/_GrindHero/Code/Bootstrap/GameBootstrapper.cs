@@ -41,9 +41,13 @@ namespace GrindHero
         private bool _pauseRequested;
         private bool _saveFailureReported;
         private float _nextSaveTime;
+        private float _heroRespawnRemaining;
 
         public bool IsReady => _isReady;
         public bool IsPaused => _isPaused;
+        public bool IsHeroRespawning { get; private set; }
+        public float EnemyPostKillRetreatSeconds =>
+            tuning != null ? tuning.enemyPostKillRetreatSeconds : 0f;
         public HeroActor Hero => hero;
         public CombatWorld CombatWorld => _combatWorld;
         public ExitGate Gate => exitGate;
@@ -155,7 +159,14 @@ namespace GrindHero
 
             hero.Initialize(tuning, _combatWorld, movementInput, this, heroSpawnPoint);
             cameraFollow.Initialize(hero.transform);
-            hud.Initialize(this, _combatWorld, hero, movementInput, TogglePause);
+            hud.Initialize(
+                this,
+                _combatWorld,
+                hero,
+                cameraFollow.GetComponent<Camera>(),
+                movementInput,
+                TogglePause,
+                enemySpawnPoints);
             exitGate.Initialize(this, hud, BossDefeated);
             if (recoveredFromBackup)
             {
@@ -170,7 +181,7 @@ namespace GrindHero
 
             if (progressData.currentHealth <= 0f)
             {
-                RespawnHeroAfterDefeat();
+                BeginHeroRespawn();
             }
 
             _nextSaveTime = Time.unscaledTime + tuning.saveIntervalSeconds;
@@ -192,6 +203,15 @@ namespace GrindHero
                 return;
             }
 
+            if (IsHeroRespawning && !_isPaused)
+            {
+                _heroRespawnRemaining -= Time.deltaTime;
+                if (_heroRespawnRemaining <= 0f)
+                {
+                    CompleteHeroRespawn();
+                }
+            }
+
             if (!_isPaused && Time.unscaledTime >= _nextSaveTime)
             {
                 SaveProgress();
@@ -199,11 +219,11 @@ namespace GrindHero
             }
         }
 
-        public void ReceiveHeroDamage(float rawDamage, DamageType damageType)
+        public bool ReceiveHeroDamage(float rawDamage, DamageType damageType)
         {
-            if (!_isReady || rawDamage <= 0f)
+            if (!_isReady || IsHeroRespawning || rawDamage <= 0f)
             {
-                return;
+                return false;
             }
 
             var dodged = UnityEngine.Random.value < DodgeChance;
@@ -230,8 +250,11 @@ namespace GrindHero
                 _progression.Data.currentHealth - (float)result.FinalDamage);
             if (_progression.Data.currentHealth <= 0f)
             {
-                RespawnHeroAfterDefeat();
+                BeginHeroRespawn();
+                return true;
             }
+
+            return false;
         }
 
         public void RecordHeroPosition(float x, float y, float z)
@@ -285,7 +308,7 @@ namespace GrindHero
             StoreRespawnState(defeat.SpawnId, state);
             if (_spawnPointsById.TryGetValue(defeat.SpawnId, out var spawnPoint))
             {
-                spawnPoint.SetRespawnDeadline(state.NextRespawnUnixSeconds);
+                spawnPoint.SetRespawnState(state);
             }
 
             SaveProgress();
@@ -326,7 +349,7 @@ namespace GrindHero
                 SaveProgress();
             }
 
-            spawnPoint.SetRespawnDeadline(nextState.NextRespawnUnixSeconds);
+            spawnPoint.SetRespawnState(nextState);
             if (updated)
             {
                 spawnPoint.SpawnEnemy();
@@ -362,7 +385,13 @@ namespace GrindHero
                 }
 
                 _spawnPointsById.Add(spawnPoint.SpawnId, spawnPoint);
-                spawnPoint.Configure(this, _combatWorld, hero.transform);
+                spawnPoint.Configure(
+                    this,
+                    _combatWorld,
+                    hero.transform,
+                    Mathf.Min(
+                        tuning.maximumMobRespawnsPerDay,
+                        spawnPoint.Definition.maximumRespawnsPerDay));
             }
         }
 
@@ -382,6 +411,7 @@ namespace GrindHero
                         new MobRespawnState(0, 0, today),
                         today);
                     StoreRespawnState(spawnPoint.SpawnId, initialState);
+                    spawnPoint.SetRespawnState(initialState);
                     spawnPoint.SpawnEnemy();
                     SaveProgress();
                     continue;
@@ -397,11 +427,12 @@ namespace GrindHero
                         SaveProgress();
                     }
 
+                    spawnPoint.SetRespawnState(currentDayState);
                     spawnPoint.SpawnEnemy();
                     continue;
                 }
 
-                spawnPoint.SetRespawnDeadline(state.NextRespawnUnixSeconds);
+                spawnPoint.SetRespawnState(state);
                 if (state.NextRespawnUnixSeconds > 0)
                 {
                     TryRespawnEnemy(spawnPoint.SpawnId);
@@ -457,8 +488,27 @@ namespace GrindHero
             _progression.Data.enemyRespawns = updatedEntries;
         }
 
-        private void RespawnHeroAfterDefeat()
+        private void BeginHeroRespawn()
         {
+            if (IsHeroRespawning)
+            {
+                return;
+            }
+
+            IsHeroRespawning = true;
+            _heroRespawnRemaining = tuning.heroRespawnDelaySeconds;
+            _progression.Data.currentHealth = 0f;
+            hero.BeginRespawn();
+            hud.ShowMessage(
+                $"Defeated — respawning in {tuning.heroRespawnDelaySeconds:0.##} seconds.",
+                Color.white);
+            SaveProgress();
+        }
+
+        private void CompleteHeroRespawn()
+        {
+            IsHeroRespawning = false;
+            _heroRespawnRemaining = 0f;
             _progression.Data.currentHealth = MaximumHealth * tuning.respawnHealthFraction;
             hero.RespawnAtSpawn();
             hud.ShowMessage("Defeated — returned to spawn at half health.", Color.white);

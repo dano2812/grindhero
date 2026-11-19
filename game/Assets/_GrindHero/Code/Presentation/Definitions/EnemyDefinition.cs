@@ -6,6 +6,8 @@ namespace GrindHero.Presentation.Definitions
     [CreateAssetMenu(menuName = "GrindHero/Enemy Definition")]
     public sealed class EnemyDefinition : ScriptableObject
     {
+        private const float FocusRangeMultiplier = 2f;
+
         public string stableId;
         public string displayName;
         public EnemyArchetype archetype;
@@ -15,11 +17,10 @@ namespace GrindHero.Presentation.Definitions
         [Min(0.1f)] public float attackCycleSeconds = 1f;
         [Min(0f)] public float windupSeconds = 0.5f;
         [Min(0.1f)] public float attackRange = 1.8f;
-        [Min(0.1f)] public float aggroRange = 6f;
         [Min(0f)] public float movementSpeed = 3.2f;
         [Min(0f)] public float chaseTimeoutSeconds = 5f;
         [Range(0f, 1f)] public float returnHealFractionPerSecond = 0.1f;
-        [Tooltip("Prototype behavior for unresolved boss leash rules; turn off to make bosses chase indefinitely.")]
+        [Tooltip("Turn off to make this enemy chase indefinitely without returning or healing.")]
         public bool returnAndHeal = true;
         public bool canRespawn = true;
         [Min(0)] public int respawnCooldownSeconds = 120;
@@ -29,6 +30,7 @@ namespace GrindHero.Presentation.Definitions
         public Color grayboxColor = Color.red;
 
         public bool IsBoss => archetype == EnemyArchetype.Boss;
+        public float FocusRange => attackRange * FocusRangeMultiplier;
 
         public string ValidateDefinition()
         {
@@ -65,13 +67,12 @@ namespace GrindHero.Presentation.Definitions
             }
 
             if (!IsFinite(attackRange) ||
-                !IsFinite(aggroRange) ||
+                !IsFinite(FocusRange) ||
                 !IsFinite(movementSpeed) ||
                 attackRange <= 0f ||
-                aggroRange < attackRange ||
                 movementSpeed < 0f)
             {
-                return $"Enemy '{stableId}' needs valid attack, aggro, and movement ranges.";
+                return $"Enemy '{stableId}' needs valid attack, focus, and movement ranges.";
             }
 
             if (!IsFinite(chaseTimeoutSeconds) ||

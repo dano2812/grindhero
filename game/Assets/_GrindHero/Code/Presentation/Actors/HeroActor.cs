@@ -28,6 +28,7 @@ namespace GrindHero.Presentation
         private readonly List<Material> _ownedMaterials = new List<Material>();
 
         public bool IsInitialized { get; private set; }
+        public bool IsRespawning { get; private set; }
         public EnemyActor CurrentTarget { get; private set; }
 
         private void Awake()
@@ -59,11 +60,30 @@ namespace GrindHero.Presentation
             CreateArmorVisuals();
         }
 
-        public void RespawnAtSpawn()
+        public void BeginRespawn()
         {
+            IsRespawning = true;
             _attackInProgress = false;
+            _windupRemaining = 0f;
             _attackTarget = null;
             CurrentTarget = null;
+            if (_weaponPivot != null)
+            {
+                _weaponPivot.localRotation = Quaternion.identity;
+            }
+        }
+
+        public void RespawnAtSpawn()
+        {
+            IsRespawning = false;
+            _attackInProgress = false;
+            _windupRemaining = 0f;
+            _attackTarget = null;
+            CurrentTarget = null;
+            if (_weaponPivot != null)
+            {
+                _weaponPivot.localRotation = Quaternion.identity;
+            }
 
             _controller.enabled = false;
             transform.position = _spawnPoint.position;
@@ -75,7 +95,7 @@ namespace GrindHero.Presentation
 
         private void Update()
         {
-            if (!IsInitialized)
+            if (!IsInitialized || IsRespawning)
             {
                 return;
             }

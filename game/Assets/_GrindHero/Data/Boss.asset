@@ -21,11 +21,10 @@ MonoBehaviour:
   attackCycleSeconds: 1
   windupSeconds: 0.6
   attackRange: 2.5
-  aggroRange: 12
   movementSpeed: 3.6
   chaseTimeoutSeconds: 5
   returnHealFractionPerSecond: 0.1
-  returnAndHeal: 0
+  returnAndHeal: 1
   canRespawn: 0
   respawnCooldownSeconds: 0
   maximumRespawnsPerDay: 0

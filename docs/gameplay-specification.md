@@ -98,8 +98,9 @@ what "fixed" means to you:
 - [ ] Each weapon uses a different input/attack pattern
 - [ ] Please recommend
 - No active skills in the first slice. Dodge and block are passive defensive
-  chance checks earned through stat points; see section 6. Other actions and
-  healing controls remain to be decided.
+  chance checks earned through stat points; see section 6. Hero healing will
+  be automatic and always active, not a manual control (owner clarification,
+  2026-11-19; not yet implemented).
 
 **Touch controls that must always be reachable:** [Your answer]  
 **Accessibility or control options important from the first slice:** [Your answer]
@@ -204,10 +205,13 @@ independently, so multiple equipped weapons attack at the same time. Chance-base
 dodge, critical hit, and block checks are part of hit resolution; their exact
 order is recommended in section 6 and should be confirmed before implementation.
 
-**Enemy attack rules:** Enemies start attacking when the hero comes within their
-proximity/aggro range. All enemy types (Basic, Advanced, and boss) use a
+**Enemy focus and attack rules:** Every enemy's focus (aggro) range is exactly
+twice its attack range. The focus range is derived from attack range, not tuned
+separately. An idle enemy stays idle outside focus range, begins chasing when
+the hero enters focus range but remains outside attack range, and engages when
+the hero enters attack range. All enemy types (Basic, Advanced, and boss) use a
 1.0-second attack cycle, measured from the start of one attack to the start of
-the next. Do not deal damage immediately when the hero first enters aggro range;
+the next. Do not deal damage immediately when the hero enters attack range;
 show the attack's wind-up before damage.
 
 **Attack cadence and wind-up:** The 1.0-second enemy cycle is user-specified.
@@ -233,8 +237,27 @@ while it returns at 10% of its maximum HP per second, capped at maximum HP. A
 player hit during the chase or return interrupts return/healing and resets the
 5-second no-hit timer; if the hero remains outside attack range, the mob gets a
 fresh chase window. This behavior is separate from defeated-enemy respawn
-cooldowns in section 7. Whether the boss uses the same return behavior remains
-open.
+cooldowns in section 7. This rule applies to every enemy type, including the
+boss. If a mob reaches its spawn before it is fully healed, it remains there and
+continues healing while idle until its HP is full. Entering combat interrupts
+this recovery.
+
+**Actor health display:** Show a compact banner above the hero and each living
+mob. Each banner displays the actor name, current/max HP, and a proportional
+health bar. Position banners using the actor's camera projection; hide them
+when the actor is outside the usable screen area, and remove a mob's banner
+when it is defeated. Keep the existing hero stats and mob respawn markers.
+
+**Killer retreat after player death:** When an enemy's attack kills the hero,
+that enemy immediately returns toward its original spawn point and cannot attack
+again for 3 seconds. If the hero hits it during that period, it leaves the
+retreat and resumes normal combat; otherwise its normal behavior resumes when
+the timer expires. This applies to every enemy type, including the boss, and
+the boss also uses the return-and-heal behavior above. No enemy can damage the
+hero while the hero is in the respawn countdown. The 3-second countdown uses
+active gameplay time and pauses when gameplay is paused. If the app closes
+during the countdown, the saved zero health starts a fresh 3-second countdown
+on the next launch.
 
 **Enemies:** List 2-4 useful archetypes for the first content slice. For each,
 describe its visible tell, threat, and counterplay.
@@ -249,14 +272,15 @@ describe its visible tell, threat, and counterplay.
 one or two attacks/telegraphs and the intended challenge.
 
 The boss's primary gameplay purpose is to unlock the next, more challenging
-location. It does not have to be stronger than every other large enemy in the
-current location. Its specific attacks and telegraphs remain to be designed.
-Its attack cycle is 1 second. Whether it uses the mob return-and-heal rule
-remains undecided; the current graybox lets it chase indefinitely and does not
-heal it while returning.
+location. For now, the owner selected ordinary mob attack behavior with higher
+damage and HP rather than a distinct attack pattern (2026-11-19). Specific
+boss-only attacks and telegraphs are deferred.
+Its attack cycle is 1 second. It uses the same 5-second chase timeout and
+return-and-heal behavior as other enemies.
 
 **Death and respawn:**  
-- What happens to the player's location and health? There will be respawn point, where will hero appear, with half of max HP
+- What happens to the player's location and health? After a 3-second countdown,
+  the hero returns to the spawn point with half of maximum HP.
 - Are any rewards, currency, or progress lost? No
 - Where does the hero return?Spawn point
 - Can ordinary enemy rewards be earned again after a respawn? Yes, within the
@@ -284,6 +308,13 @@ increase from collected points. A successful dodge avoids damage. A successful
 block means the hero receives 80% of the damage; this rule may be adjusted
 later. The first-slice Basic enemy variants only provide HP and Axe Attack
 points; sources for the other stats remain undecided.
+
+**Owner clarification (2026-11-19):** Hero healing is automatic and always
+active, rather than a manual action or out-of-combat-only effect. This is a
+requirement for progression work, not implemented hero regeneration in the
+current slice. Its starting rate, per-point scaling, and sources of Healing,
+critical, Dodge, and Block points still need concrete values/content before
+implementation; "the same for other stats" does not specify those sources.
 
 **Damage calculation (current rule):**
 - Weapon attack damage is the base damage for its weapon type plus the weapon's
@@ -333,12 +364,14 @@ armor loadout; do not add a hidden minimum-damage floor.
 **Make combat balance adjustable:** Keep the damage formula in tested combat
 code, but store tuning values in version-controlled data assets (Unity
 ScriptableObjects are suitable) rather than constants buried in enemy or weapon
-behaviors. Weapon definitions should own damage, cycle, wind-up, and range;
-enemy definitions should own health, attack damage/type, cycle, wind-up,
-telegraph, and special-attack timing; a shared combat-tuning asset should own
-values such as the block multiplier and critical multiplier. Validate that
-health and damage are non-negative and attack cycles are greater than zero.
-Changing these values should not require changing combat code.
+behaviors. Weapon definitions should own damage, cycle, wind-up, and attack
+range; enemy definitions should own health, attack damage/type, cycle, wind-up,
+attack range, telegraph, and special-attack timing. Enemy focus range is derived
+as exactly twice attack range, not stored as separate tuning. A shared
+combat-tuning asset should own values such as the block multiplier and critical
+multiplier. Validate that health and damage are non-negative and attack cycles
+are greater than zero. Changing these values should not require changing
+combat code.
 
 **Longer-term progression:** Character-building choices will be decided later.
 Equipment may be leveled by collecting matching equipment pieces, increasing
@@ -364,18 +397,19 @@ they are not approved final balance or a commitment to the starting loadout.
 | Actor/content | Current prototype values |
 | --- | --- |
 | Hero | 100 starting max HP; 15 base Axe damage + 5 axe-weapon damage; 1-second attack cycle with 0.25-second wind-up; starts with 2 head and 3 torso Axe armor equipped; 0% dodge/block; block multiplier 0.8; defeat respawn at 50% max HP |
-| Basic — HP | 80 HP; 11 Axe damage; 0.5-second wind-up; 2.1 attack range / 8 aggro range; 3.2 movement speed; drops 1 permanent HP point (+5 max HP); 120-second respawn cooldown |
-| Basic — Axe Attack | 80 HP; 13 Axe damage; otherwise shares the Basic HP profile; drops 1 permanent Axe Attack point (+1 base Axe damage); 120-second respawn cooldown |
-| Advanced | 180 HP; 18 Axe damage; 0.65-second wind-up; 2.25 attack range / 9 aggro range; 3.4 movement speed; no stat reward yet; 300-second respawn cooldown |
-| Boss | 450 HP; 22 Axe damage; 0.6-second wind-up; 2.5 attack range / 12 aggro range; 3.6 movement speed; no reward or respawn yet; currently chases indefinitely instead of returning/healing |
+| Basic — HP | 80 HP; 11 Axe damage; 0.5-second wind-up; 2.1 attack / 4.2 focus range; 3.2 movement speed; drops 1 permanent HP point (+5 max HP); 120-second respawn cooldown |
+| Basic — Axe Attack | 80 HP; 13 Axe damage; 2.1 attack / 4.2 focus range; otherwise shares the Basic HP profile; drops 1 permanent Axe Attack point (+1 base Axe damage); 120-second respawn cooldown |
+| Advanced | 180 HP; 18 Axe damage; 0.65-second wind-up; 2.25 attack / 4.5 focus range; 3.4 movement speed; no stat reward yet; 300-second respawn cooldown |
+| Boss | 450 HP; 22 Axe damage; 0.6-second wind-up; 2.5 attack / 5.0 focus range; 3.6 movement speed; returns and heals at 10% max HP per second after a 5-second chase; no reward or respawn yet |
 
-All enemy attack cycles are 1 second, as specified. Ordinary enemies currently
-chase for 5 seconds after the hero leaves attack range and heal at 10% of max HP
-per second while returning; healing stops once they reach their spawn point.
+All enemy attack cycles are 1 second, as specified. All enemies currently
+chase for 5 seconds after the hero leaves attack range and heal at 10% of max
+HP per second while returning, capped at full HP. If they reach spawn before
+full health, they continue healing while idle until full.
 The three-respawn cap is currently **per spawn point per UTC calendar day**.
-These interpretations still need owner review. The first-slice project does
-not yet contain the five-slot inventory system, quests, treasures, story
-content, or equipment drops.
+That cap and UTC reset remain implementation assumptions for owner review.
+The first-slice project does not yet contain the five-slot inventory system,
+quests, treasures, story content, or equipment drops.
 
 ## 7. Sections, exploration, quests, and story
 
@@ -394,6 +428,13 @@ content, or equipment drops.
   the next UTC calendar day. Cooldowns and counts are saved locally and continue
   while the app is closed. This scope/timezone is an implementation assumption,
   not an owner-approved design decision.
+- While a respawnable mob is defeated, show a compact marker above its spawn
+  point, positioned from that point's screen projection rather than in a global
+  HUD list. The marker shows the mob name, remaining cooldown as `MM:SS`, and an
+  elapsed progress bar. Unlabeled filled pips show remaining daily respawns;
+  muted outlined pips show respawns already used. Do not add a text count. Hide
+  the marker while the mob is alive or its spawn point is outside the usable
+  screen area.
 
 **Quests:**  
 - Should quests be automatically accepted, explicitly accepted, or either?There should be some entity with exlamation mark which tells the quest
@@ -469,19 +510,39 @@ Write player-visible rules in this format:
    the exit remains locked.
 2. Given the boss is defeated, when the player closes and reopens the game, then
    the boss progress is saved and the exit remains unlocked.
-3. Given the player dies, when they return to the game, then the hero respawns at
-   the spawn point with half maximum HP and loses no rewards or progress.
+3. Given the player dies, when the 3-second respawn countdown completes, then
+   the hero returns to the spawn point with half maximum HP and loses no rewards
+   or progress.
 4. Given the player loots a treasure, when they revisit the area, then the
    treasure remains marked as looted.
 5. Given a Basic HP or Attack subtype is defeated, then its deterministic stat
    reward is shown and increases the corresponding stat.
 6. Given any enemy starts an attack, when it starts its next attack, then the
    start-to-start cycle is 1.0 second and its wind-up resolves before damage.
-7. Given the hero leaves an enemy's attack range and does not hit it for
-   5 seconds, then the enemy returns toward its original spawn point and heals
-   at 10% of its maximum HP per second, capped at maximum HP.
+7. Given the hero leaves any enemy's attack range and does not hit it for
+   5 seconds, then the enemy, including the boss, returns toward its original
+   spawn point and heals at 10% of its maximum HP per second, capped at maximum
+   HP; if it arrives before full HP, it remains at spawn and continues healing
+   until fully restored unless combat resumes.
 8. Given a mob is chasing or returning, when the hero hits it, then the mob
    stops returning/healing and its 5-second no-hit timer resets.
+9. Given an enemy kills the hero, when the respawn countdown begins, then that
+   enemy retreats toward its spawn and no enemy attacks the hero for 3 seconds.
+10. Given the killer is retreating after the hero's death, when the hero hits it
+    before the 3-second lock expires, then it resumes normal combat immediately;
+    otherwise it resumes normal behavior when the lock expires.
+11. Given a respawnable mob is defeated, when its cooldown is pending, then a
+    marker follows the spawn point and shows the mob name, remaining time,
+    elapsed progress bar, and visual-only pips for remaining daily respawns.
+    Used pips are muted, and the marker is hidden when the mob is alive or its
+    spawn point is outside the usable screen area. The pips reflect the
+    prototype's UTC-day reset behavior.
+12. Given an idle enemy is outside twice its attack range, then it remains idle;
+    when the hero enters that focus range but remains outside attack range, the
+    enemy starts chasing and only engages an attack inside attack range.
+13. Given the hero and living mobs are visible, then each has a banner above its
+    figure showing its name, current/max HP, and health-bar fill; when a mob is
+    defeated, its banner is removed.
 
 ## 12. Open questions and sign-off
 
@@ -489,18 +550,17 @@ Write player-visible rules in this format:
 | --- | --- | --- |
 | How do head and torso armor values combine, and when are armor, block, dodge, and critical-hit checks applied? | Recommended in section 6: add matching armor, apply critical damage before armor, dodge avoids all damage, and apply block after armor; confirm before implementation. | Combat implementation |
 | How many HP/Axe Attack points does each Basic subtype reward? Are collected points permanent? | The prototype grants 1 permanent point for the matching stat on each Basic defeat. Confirm the amount and permanence. | Reward tests |
-| What are each enemy's aggro range and wind-up? What does the Advanced enemy do/drop? | Prototype ranges, wind-ups, and attack damage are listed above; tune them in playtests. Advanced currently has no stat reward; its distinctive threat/reward remain open. | Combat prototype |
+| What are enemy wind-up values? What does the Advanced enemy do/drop? | Focus range is now twice attack range for every enemy; the wind-ups remain prototype values to tune in playtests. Advanced currently has no stat reward; its distinctive threat/reward remain open. | Combat prototype |
 | Are the reference HP and example armor values in section 6 acceptable, and does the hero start with armor equipped? | The graybox currently equips 2 head + 3 torso Axe armor. This is not approved; test with both 0 and 5 armor and choose the starting loadout. | Combat implementation |
-| Does the boss use the same return-and-heal behavior as other mobs? | The graybox currently lets the boss chase indefinitely and does not return/heal. Confirm whether this exception is intended. | Boss implementation |
 | Does the three-respawn daily limit apply per enemy, spawn point, or area? When does a new day begin? | The prototype assumes per spawn point and resets at the next UTC calendar day. Confirm or change this scope/timezone. | Respawn implementation |
-| How does the hero heal, and which sources provide Healing, critical, Dodge, and Block points? | [Your answer] | Progression implementation |
+| How does the hero heal, and which sources provide Healing, critical, Dodge, and Block points? | It is auto heal, alway applied, the same for other stats | Progression implementation |
 | How are additional weapon slots unlocked? Can shields occupy a slot that otherwise attacks? | Later decision | Before adding multi-weapon progression/shields |
-| What are the boss's attacks and can boss rewards be repeated? | [Your answer] | Boss/content implementation |
+| What are the boss's attacks and can boss rewards be repeated? | Now lets the boss be tha same as mobs but it is stronger with damage and hp | Boss/content implementation |
 
 **Things you want me to research or propose rather than decide on your behalf:**  
-[Your answer]
+Check the best practicies for mobile games, best earning games based on micro purchaces, we chould use same logic.
 
-**Owner approval/date after review:** [Your answer]
+**Owner approval/date after review:** 19.11.2026
 
 ---
 

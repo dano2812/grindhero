@@ -17,6 +17,10 @@ namespace GrindHero.Presentation.Definitions
         [Range(0f, 1f)] public float blockDamageMultiplier = 0.8f;
         [Range(0.1f, 1f)] public float respawnHealthFraction = 0.5f;
 
+        [Header("Death Recovery")]
+        [Min(0.1f)] public float heroRespawnDelaySeconds = 3f;
+        [Min(0.1f)] public float enemyPostKillRetreatSeconds = 3f;
+
         [Header("Equipment")]
         public WeaponDefinition startingWeapon;
         public ArmorDefinition headArmor;
@@ -57,11 +61,15 @@ namespace GrindHero.Presentation.Definitions
             if (!IsFinite(respawnHealthFraction) ||
                 respawnHealthFraction < 0f ||
                 respawnHealthFraction > 1f ||
+                !IsFinite(heroRespawnDelaySeconds) ||
+                heroRespawnDelaySeconds <= 0f ||
+                !IsFinite(enemyPostKillRetreatSeconds) ||
+                enemyPostKillRetreatSeconds <= 0f ||
                 maximumMobRespawnsPerDay < 1 ||
                 !IsFinite(saveIntervalSeconds) ||
                 saveIntervalSeconds <= 0f)
             {
-                return "Respawn health, daily respawns, and save interval must be valid.";
+                return "Respawn health and delays, daily respawns, and save interval must be valid.";
             }
 
             if (startingWeapon == null)

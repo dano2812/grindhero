@@ -9,6 +9,7 @@ namespace GrindHero.Presentation.World
         private readonly List<EnemyActor> _enemies = new List<EnemyActor>();
 
         public int AliveEnemyCount => _enemies.Count;
+        public IReadOnlyList<EnemyActor> ActiveEnemies => _enemies;
 
         public void Register(EnemyActor enemy)
         {

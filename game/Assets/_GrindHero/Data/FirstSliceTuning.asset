@@ -21,6 +21,8 @@ MonoBehaviour:
   startingBlockChance: 0
   blockDamageMultiplier: 0.8
   respawnHealthFraction: 0.5
+  heroRespawnDelaySeconds: 3
+  enemyPostKillRetreatSeconds: 3
   startingWeapon: {fileID: 11400000, guid: a21ea24dec9d64841b3bca94659b65a4, type: 2}
   headArmor: {fileID: 11400000, guid: 356677b37fadf1641859adbc1fffd808, type: 2}
   torsoArmor: {fileID: 11400000, guid: 385790b762b5f0d47b3fc5cb02d67636, type: 2}

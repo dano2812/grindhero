@@ -118,7 +118,6 @@ namespace GrindHero.EditorTools
                 11f,
                 0.5f,
                 2.1f,
-                8f,
                 3.2f,
                 120,
                 RewardStat.Health,
@@ -133,7 +132,6 @@ namespace GrindHero.EditorTools
                 13f,
                 0.5f,
                 2.1f,
-                8f,
                 3.2f,
                 120,
                 RewardStat.AxeAttack,
@@ -148,7 +146,6 @@ namespace GrindHero.EditorTools
                 18f,
                 0.65f,
                 2.25f,
-                9f,
                 3.4f,
                 300,
                 RewardStat.None,
@@ -163,14 +160,13 @@ namespace GrindHero.EditorTools
                 22f,
                 0.6f,
                 2.5f,
-                12f,
                 3.6f,
                 0,
                 RewardStat.None,
                 new Color(0.68f, 0.12f, 0.18f));
             boss.canRespawn = false;
             boss.maximumRespawnsPerDay = 0;
-            boss.returnAndHeal = false;
+            boss.returnAndHeal = true;
             EditorUtility.SetDirty(boss);
 
             var tuning = CreateAsset(
@@ -187,6 +183,8 @@ namespace GrindHero.EditorTools
                     asset.startingBlockChance = 0f;
                     asset.blockDamageMultiplier = 0.8f;
                     asset.respawnHealthFraction = 0.5f;
+                    asset.heroRespawnDelaySeconds = 3f;
+                    asset.enemyPostKillRetreatSeconds = 3f;
                     asset.startingWeapon = weapon;
                     asset.headArmor = headArmor;
                     asset.torsoArmor = torsoArmor;
@@ -206,7 +204,6 @@ namespace GrindHero.EditorTools
             float attackDamage,
             float windupSeconds,
             float attackRange,
-            float aggroRange,
             float movementSpeed,
             int respawnCooldownSeconds,
             RewardStat rewardStat,
@@ -226,7 +223,6 @@ namespace GrindHero.EditorTools
                     asset.attackCycleSeconds = 1f;
                     asset.windupSeconds = windupSeconds;
                     asset.attackRange = attackRange;
-                    asset.aggroRange = aggroRange;
                     asset.movementSpeed = movementSpeed;
                     asset.chaseTimeoutSeconds = 5f;
                     asset.returnHealFractionPerSecond = 0.1f;

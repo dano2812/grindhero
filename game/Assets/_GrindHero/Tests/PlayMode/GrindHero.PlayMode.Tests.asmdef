@@ -2,7 +2,9 @@
   "name": "GrindHero.PlayMode.Tests",
   "rootNamespace": "GrindHero.Tests.PlayMode",
   "references": [
+    "GrindHero.Application",
     "GrindHero.Bootstrap",
+    "GrindHero.Domain",
     "GrindHero.Presentation"
   ],
   "includePlatforms": [],
